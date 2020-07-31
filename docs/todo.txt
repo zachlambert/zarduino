@@ -1,0 +1,18 @@
+Core:
+- Simple GPIO
+- ADC
+- Interrupts
+
+Timing:
+- PWM
+- Timers and counters
+
+Comms:
+- USART
+- SPI
+- I2C
+
+Extra:
+- Capacitive touch
+- Watchdog timer
+- Sleep modes
