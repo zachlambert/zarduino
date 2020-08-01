@@ -14,6 +14,7 @@ add_library(zarduino
     src/core/adc.c
     src/core/pins.c
     src/core/regs.c
+    src/comms/uart.c
 )
 target_include_directories(zarduino
     PUBLIC include

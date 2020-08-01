@@ -12,3 +12,8 @@ add_executable(analog_read.elf
     analog_read/main.c
 )
 target_link_libraries(analog_read.elf zarduino)
+
+add_executable(serial.elf
+    serial/main.c
+)
+target_link_libraries(serial.elf zarduino)
