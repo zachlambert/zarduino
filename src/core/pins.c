@@ -2,6 +2,8 @@
 
 #include <avr/io.h>
 
+#include "core/regs.h"
+
 // To use the GPIO pins, you need to write to the relevant
 // registers to configure the direction (input / output) and
 // write data (write to the PORTX registers), or read data
@@ -30,20 +32,6 @@ IOPin make_io_pin(IOPort port, uint8_t bit)
         .bit = bit
     };
     return pin;
-}
-
-void reg_write_bit(volatile uint8_t *reg, uint8_t bit, uint8_t value)
-{
-    if (value) {
-        *reg |= 1<<bit;
-    } else {
-        *reg &= ~(1<<bit);
-    }
-}
-
-uint8_t reg_read_bit(volatile uint8_t *reg, uint8_t bit)
-{
-    return (*reg >> bit) & 0x01;
 }
 
 void gpio_mode_input(IOPin pin)
@@ -86,10 +74,124 @@ uint8_t gpio_read(IOPin pin)
 }
 
 // TODO Put all the pins here
-// ...
-const IOPin ArduinoPin_BUILT_IN_LED = {
+const IOPin PIN_D0 = {
+    .direction_reg = &DDRD,
+    .output_reg = &PORTD,
+    .input_reg = &PIND,
+    .bit = 0
+};
+const IOPin PIN_D1 = {
+    .direction_reg = &DDRD,
+    .output_reg = &PORTD,
+    .input_reg = &PIND,
+    .bit = 1
+};
+const IOPin PIN_D2 = {
+    .direction_reg = &DDRD,
+    .output_reg = &PORTD,
+    .input_reg = &PIND,
+    .bit = 2
+};
+const IOPin PIN_D3 = {
+    .direction_reg = &DDRD,
+    .output_reg = &PORTD,
+    .input_reg = &PIND,
+    .bit = 3
+};
+const IOPin PIN_D4 = {
+    .direction_reg = &DDRD,
+    .output_reg = &PORTD,
+    .input_reg = &PIND,
+    .bit = 4
+};
+const IOPin PIN_D5 = {
+    .direction_reg = &DDRD,
+    .output_reg = &PORTD,
+    .input_reg = &PIND,
+    .bit = 5
+};
+const IOPin PIN_D6 = {
+    .direction_reg = &DDRD,
+    .output_reg = &PORTD,
+    .input_reg = &PIND,
+    .bit = 6
+};
+const IOPin PIN_D7 = {
+    .direction_reg = &DDRD,
+    .output_reg = &PORTD,
+    .input_reg = &PIND,
+    .bit = 7
+};
+const IOPin PIN_D8 = {
     .direction_reg = &DDRB,
     .output_reg = &PORTB,
     .input_reg = &PINB,
+    .bit = 0
+};
+const IOPin PIN_D9 = {
+    .direction_reg = &DDRB,
+    .output_reg = &PORTB,
+    .input_reg = &PINB,
+    .bit = 1
+};
+const IOPin PIN_D10 = {
+    .direction_reg = &DDRB,
+    .output_reg = &PORTB,
+    .input_reg = &PINB,
+    .bit = 2
+};
+const IOPin PIN_D11 = {
+    .direction_reg = &DDRB,
+    .output_reg = &PORTB,
+    .input_reg = &PINB,
+    .bit = 3
+};
+const IOPin PIN_D12 = {
+    .direction_reg = &DDRB,
+    .output_reg = &PORTB,
+    .input_reg = &PINB,
+    .bit = 4
+};
+const IOPin PIN_D13 = {
+    .direction_reg = &DDRB,
+    .output_reg = &PORTB,
+    .input_reg = &PINB,
+    .bit = 5
+};
+
+const IOPin PIN_A0 = {
+    .direction_reg = &DDRC,
+    .output_reg = &PORTC,
+    .input_reg = &PINC,
+    .bit = 0
+};
+const IOPin PIN_A1 = {
+    .direction_reg = &DDRC,
+    .output_reg = &PORTC,
+    .input_reg = &PINC,
+    .bit = 1
+};
+const IOPin PIN_A2 = {
+    .direction_reg = &DDRC,
+    .output_reg = &PORTC,
+    .input_reg = &PINC,
+    .bit = 2
+};
+const IOPin PIN_A3 = {
+    .direction_reg = &DDRC,
+    .output_reg = &PORTC,
+    .input_reg = &PINC,
+    .bit = 3
+};
+const IOPin PIN_A4 = {
+    .direction_reg = &DDRC,
+    .output_reg = &PORTC,
+    .input_reg = &PINC,
+    .bit = 4
+};
+const IOPin PIN_A5 = {
+    .direction_reg = &DDRC,
+    .output_reg = &PORTC,
+    .input_reg = &PINC,
     .bit = 5
 };

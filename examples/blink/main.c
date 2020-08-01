@@ -4,7 +4,7 @@
 
 int main(void)
 {
-    IOPin led = ArduinoPin_BUILT_IN_LED;
+    IOPin led = PIN_BUILT_IN_LED;
     gpio_mode_output(led);
     while (1) {
         gpio_write(led, 1);

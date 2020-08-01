@@ -11,7 +11,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 include(tools/target_cmake_scripts/arduino_uno.cmake)
 
 add_library(zarduino
+    src/core/adc.c
     src/core/pins.c
+    src/core/regs.c
 )
 target_include_directories(zarduino
     PUBLIC include

@@ -27,28 +27,34 @@ void gpio_mode_output_inverse(IOPin pin);
 void gpio_write(IOPin pin, uint8_t value);
 uint8_t gpio_read(IOPin pin);
 
-/*
-extern const IOPin ArduinoPin_D0;
-extern const IOPin ArduinoPin_D1;
-extern const IOPin ArduinoPin_D2;
-extern const IOPin ArduinoPin_D3;
-extern const IOPin ArduinoPin_D4;
-extern const IOPin ArduinoPin_D5;
-extern const IOPin ArduinoPin_D6;
-extern const IOPin ArduinoPin_D7;
-extern const IOPin ArduinoPin_D8;
-extern const IOPin ArduinoPin_D9;
-extern const IOPin ArduinoPin_D10;
-extern const IOPin ArduinoPin_D11;
-extern const IOPin ArduinoPin_D12;
-extern const IOPin ArduinoPin_D13;
-extern const IOPin ArduinoPin_A0;
-extern const IOPin ArduinoPin_A1;
-extern const IOPin ArduinoPin_A2;
-extern const IOPin ArduinoPin_A3;
-extern const IOPin ArduinoPin_A4;
-extern const IOPin ArduinoPin_A5;
-*/
-extern const IOPin ArduinoPin_BUILT_IN_LED;
+extern const IOPin PIN_D0;
+extern const IOPin PIN_D1;
+extern const IOPin PIN_D2;
+extern const IOPin PIN_D3;
+extern const IOPin PIN_D4;
+extern const IOPin PIN_D5;
+extern const IOPin PIN_D6;
+extern const IOPin PIN_D7;
+extern const IOPin PIN_D8;
+extern const IOPin PIN_D9;
+extern const IOPin PIN_D10;
+extern const IOPin PIN_D11;
+extern const IOPin PIN_D12;
+extern const IOPin PIN_D13;
+extern const IOPin PIN_A0;
+extern const IOPin PIN_A1;
+extern const IOPin PIN_A2;
+extern const IOPin PIN_A3;
+extern const IOPin PIN_A4;
+extern const IOPin PIN_A5;
+extern const IOPin PIN_BUILT_IN_LED;
+
+#define PIN_BUILT_IN_LED PIN_D13
+#define PIN_SS PIN_D10
+#define PIN_MOSI PIN_D11
+#define PIN_MISO PIN_D12
+#define PIN_SCK PIN_D13
+#define PIN_RX PIN_D0
+#define PIN_TX PIN_D2
 
 #endif
