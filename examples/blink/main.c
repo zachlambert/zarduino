@@ -1,15 +1,15 @@
 
-#include <util/delay.h>
 #include "core/pins.h"
+#include "timing/delay.h"
 
-int main()
+int main(void)
 {
     IOPin led = ArduinoPin_BUILT_IN_LED;
     gpio_mode_output(led);
     while (1) {
         gpio_write(led, 1);
-        _delay_ms(500); 
+        delay(500);
         gpio_write(led, 0);
-        _delay_ms(500);
+        delay(500);
     }
 }

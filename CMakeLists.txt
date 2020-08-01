@@ -1,28 +1,14 @@
-cmake_minimum_required(VERSION 2.6)
-project(zarduino)
+cmake_minimum_required(VERSION 3.0)
+project(
+    "Zarduino"
+    VERSION 0.1.0
+    DESCRIPTION "A library for controlling Arduino boards and AVR microcontrollers without using the Arduino libraries."
+    LANGUAGES C
+)
 
-# set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
-# Settings for arduino UNO
-
-SET(CMAKE_SYSTEM_NAME Generic)
-
-SET(CMAKE_C_COMPILER avr-gcc)
-SET(CMAKE_CXX_COMPILER avr-g++)
-
-SET(CSTANDARD "-std=gnu99")
-SET(COPT "-Os")
-SET(CMCU "-mmcu=atmega328")
-SET(CDEFS "-DF_CPU=16000000")
-
-set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
-set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
-
-SET(CFLAGS "${CMCU} ${CDEFS} ${COPT} ${CSTANDARD}")
-SET(CXXFLAGS "${CMCU} ${CDEFS} ${COPT}")
-
-SET(CMAKE_C_FLAGS  ${CFLAGS})
-SET(CMAKE_CXX_FLAGS ${CXXFLAGS})
+include(tools/target_cmake_scripts/arduino_uno.cmake)
 
 add_library(zarduino
     src/core/pins.c
