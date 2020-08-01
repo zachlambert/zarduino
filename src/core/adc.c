@@ -1,4 +1,5 @@
 #include "core/adc.h"
+#include "core/regs.h"
 
 void adc_initialise(ADCConfig *adc_config)
 {
@@ -9,6 +10,7 @@ void adc_initialise(ADCConfig *adc_config)
     // 10 -> Unused
     // 11 -> Internal 1.1V reference with external capacitor
     //       at AREF pin
+    ADMUX = adc_config->mux;
 }
 
 uint16_t adc_read_polling(ADCConfig *adc_config)

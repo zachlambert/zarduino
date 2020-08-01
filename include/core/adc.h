@@ -22,7 +22,17 @@ typedef enum {
 } ADCConfigReference;
 
 typedef struct {
-
+    struct mux {
+        ADCConfigReference reference : 2;
+        uint8_t left_adjust_result : 1;
+        uint8_t _reserved : 1;
+        uint8_t channel_select : 4;
+    };
+    struct control {
+        uint8_t enable : 1;
+        uint8_t start : 1;
+        uint8_t auto_trigger_enable : 1;
+    };
 } ADCConfig;
 
 typedef void (*adc_callback_t)(uint16_t);

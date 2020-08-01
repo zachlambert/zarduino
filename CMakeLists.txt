@@ -17,6 +17,9 @@ add_library(zarduino
 )
 target_include_directories(zarduino
     PUBLIC include
+    PRIVATE /usr/lib/avr/include
 )
+# avr-gcc knows where the avr header files are, but putting
+# it here allows the intellisense to know they exist
 
 add_subdirectory(examples)
