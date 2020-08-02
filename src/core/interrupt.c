@@ -2,6 +2,9 @@
 #include "core/regs.h"
 #include <avr/io.h>
 #include <stdlib.h>
+#include "core/pins.h"
+#include "core/pin_data.h"
+#include <avr/interrupt.h>
 
 // There are two types of interrupt:
 // 1.Dedicated external interrupts:
@@ -79,13 +82,13 @@ ISR(PCINT2_vect)
 void interrupt_pin_add_callback(Pin pin, void (*callback)(void))
 {
     PinData *data = pin;
-    if (pin->pcint < 8) {
+    if (data->pcint < 8) {
         if (!reg_read_bit(&PCICR, PCIE0)) {
             PINB_prev = PINB;
             reg_write_bit(&PCICR, PCIE0, 1);
         }
         pcint0_callbacks[data->bit] = callback;
-    } else if (pin->pcint < 16) {
+    } else if (data->pcint < 16) {
         if (!reg_read_bit(&PCICR, PCIE1)) {
             PINC_prev = PINC;
             reg_write_bit(&PCICR, PCIE1, 1);

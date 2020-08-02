@@ -4,8 +4,8 @@
 
 int main(void)
 {
-    IOPin led = PIN_BUILT_IN_LED;
-    IOPin button = PIN_D2;
+    Pin led = PIN_BUILT_IN_LED;
+    Pin button = PIN_D2;
     gpio_mode_output(led);
     gpio_mode_input(button);
     uint8_t value;

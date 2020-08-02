@@ -1,18 +1,9 @@
 #include "core/pins.h"
+#include "core/pin_data.h"
 
 #include <avr/io.h>
 
 #include "core/regs.h"
-
-
-typedef struct {
-    volatile uint8_t *direction_reg; // DDRX
-    volatile uint8_t *output_reg; // PORTX
-    volatile uint8_t *input_reg; // PINX
-    uint8_t bit;
-    uint8_t pcint;
-} PinData;
-
 
 void gpio_mode_input(Pin pin)
 {

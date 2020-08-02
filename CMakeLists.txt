@@ -12,13 +12,14 @@ include(tools/target_cmake_scripts/arduino_uno.cmake)
 
 add_library(zarduino
     src/core/adc.c
-    src/core/pins.c
+    src/core/pin_data.c
     src/core/regs.c
     src/comms/uart.c
+    src/core/interrupt.c
 )
 target_include_directories(zarduino
     PUBLIC include
-    PRIVATE /usr/lib/avr/include
+    PRIVATE src /usr/lib/avr/include
 )
 # avr-gcc knows where the avr header files are, but putting
 # it here allows the intellisense to know they exist
