@@ -3,9 +3,10 @@
 #include "core/interrupt.h"
 #include "comms/uart.h"
 
+int num;
 void callback(void)
 {
-    printf("Pin callback\n");
+    printf("Pin callback %d\n", num++);
 }
 
 int main(void)
