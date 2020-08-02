@@ -16,7 +16,7 @@
 
 typedef enum {
     ADC_REFERENCE_AREF = 0x00,
-    ADC_REFERENCE_AVCC_EXT_CAP = 0x01,
+    ADC_REFERENCE_AVCC = 0x01,
     ADC_REFERENCE_INT_1V1_EXT_CAP = 0x11
 } ADCReference;
 
@@ -46,12 +46,16 @@ typedef struct {
     ADCReference reference;
     ADCPrescaler prescaler_select;
     uint8_t digital_input_disable;
+    uint8_t analog_pin;
 } ADCConfig;
 
 typedef void (*ADCCallback)(uint16_t);
 
-void adc_initialise(ADCConfig *adc_config);
-uint16_t adc_read_polling(IOPin pin);
+ADCConfig adc_create_config(void);
+void adc_initialise(ADCConfig *config);
+uint16_t adc_read_wait(void);
 void adc_read_callback(IOPin pin, ADCCallback adc_callback);
+void adc_read_callback_repeat(void);
+void adc_read_callback_stop(void);
 
 #endif
