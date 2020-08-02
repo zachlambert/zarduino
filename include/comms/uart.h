@@ -4,8 +4,10 @@
 #include "core/pins.h"
 #include "core/regs.h"
 
+#include <stdio.h>
+
 void uart_init(void);
-void uart_putchar(char c);
-void uart_getchar(char c);
+void uart_putchar(char c, FILE *stream);
+char uart_getchar(FILE *stream);
 
 #endif

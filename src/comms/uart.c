@@ -30,15 +30,30 @@ void uart_init(void)
     reg_write_bit(&UCSR0B, UCSZ02, 0);
     reg_write_bit(&UCSR0C, UCSZ01, 1);
     reg_write_bit(&UCSR0C, UCSZ00, 1);
+
+    static FILE uart_ostream = FDEV_SETUP_STREAM(
+        uart_putchar, NULL, _FDEV_SETUP_WRITE
+    );
+    static FILE uart_istream = FDEV_SETUP_STREAM(
+        NULL, uart_getchar, _FDEV_SETUP_READ
+    );
+
+    stdout = &uart_ostream;
+    stdin = &uart_istream;
 }
 
-void uart_putchar(char c)
+void uart_putchar(char c, FILE *stream)
 {
-    while (!reg_read_bit(&UCSR0A, UDRE0)) {}
+    if (c == '\n') {
+        uart_putchar('\r', stream);
+    }
+    while (!reg_read_bit(&UCSR0A, UDRE0));
     UDR0 = c;
+    return 0;
 }
 
-void uart_getchar(char c)
+char uart_getchar(FILE *stream)
 {
-
+    while (!reg_read_bit(&UCSR0A, UDRE0));
+    return UDR0;
 }
