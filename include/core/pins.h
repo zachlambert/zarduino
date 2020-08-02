@@ -34,7 +34,9 @@ extern const Pin PIN_A2;
 extern const Pin PIN_A3;
 extern const Pin PIN_A4;
 extern const Pin PIN_A5;
-extern const Pin PIN_BUILT_IN_LED;
+extern const Pin PIN_XTAL1;
+extern const Pin PIN_XTAL2;
+extern const Pin PIN_RESET;
 
 #define PIN_BUILT_IN_LED PIN_D13
 #define PIN_SS PIN_D10
