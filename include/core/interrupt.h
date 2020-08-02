@@ -12,6 +12,20 @@ typedef enum {
     INTERRUPT_TYPE_RISING = 0b11,
 } InterruptType;
 
-void interrupt_add_callback(IOPin pin, void (*callback)(void));
+typedef enum {
+    INTERRUPT_EXTERNAL_0,
+    INTERRUPT_EXTERNAL_1
+} InterruptExternal;
+
+void interrupt_pin_add_callback(
+    Pin pin,
+    void (*callback)(void)
+);
+
+void interrupt_external_add_callback(
+    InterruptExternal interrupt_external,
+    InterruptType interrupt_type,
+    void (*callback)(void)
+);
 
 #endif
