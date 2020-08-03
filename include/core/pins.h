@@ -39,11 +39,19 @@ extern const Pin PIN_XTAL2;
 extern const Pin PIN_RESET;
 
 #define PIN_BUILT_IN_LED PIN_D13
+
 #define PIN_SS PIN_D10
 #define PIN_MOSI PIN_D11
 #define PIN_MISO PIN_D12
 #define PIN_SCK PIN_D13
 #define PIN_RX PIN_D0
 #define PIN_TX PIN_D2
+
+#define PIN_PWM_D3 PIN_D3
+#define PIN_PWM_D5 PIN_D5
+#define PIN_PWM_D6 PIN_D6
+#define PIN_PWM_D9 PIN_D9
+#define PIN_PWM_D10 PIN_D10
+#define PIN_PWM_D11 PIN_D11
 
 #endif
