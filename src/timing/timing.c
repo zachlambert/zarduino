@@ -56,6 +56,9 @@
 // - Configure specific period and duty cycle
 // - For timer/counter 0, use the input capture
 
+
+// ===== Enums =====
+
 typedef enum {
     OUTPUT_COMPARE_MODE_DISABLED,
     OUTPUT_COMPARE_MODE_TOGGLE,
@@ -73,19 +76,21 @@ typedef enum {
 } Timer0Waveform;
 
 typedef enum {
-    TIMER1_WAVEFORM_NORMAL,
-    TIMER1_WAVEFORM_PWM_PHASE_CORRECT_8,
-    TIMER1_WAVEFORM_PWM_PHASE_CORRECT_9,
-    TIMER1_WAVEFORM_PWM_PHASE_CORRECT_10,
-    TIMER1_WAVEFORM_CTC_OCR1A,
-    TIMER1_WAVEFORM_PWM_FAST_8,
-    TIMER1_WAVEFORM_PWM_FAST_9,
-    TIMER1_WAVEFORM_PWM_FAST_10,
-    TIMER1_WAVEFORM_PWM_PHASE_FREQ_CORRECT_ICR1,
-    TIMER1_WAVEFORM_PWM_PHASE_FREQ_CORRECT_OCR1A,
-    TIMER1_WAVEFORM_PWM_PHASE_CORRECT_ICR1,
-    TIMER1_WAVEFORM_PWM_PHASE_CORRECT_OCR1A,
-    TIMER1_WAVEFORM_CTC_ICR1,
+    TIMER1_WAVEFORM_NORMAL = 0,
+    TIMER1_WAVEFORM_PWM_PHASE_CORRECT_8 = 1,
+    TIMER1_WAVEFORM_PWM_PHASE_CORRECT_9 = 2,
+    TIMER1_WAVEFORM_PWM_PHASE_CORRECT_10 = 3,
+    TIMER1_WAVEFORM_CTC_OCR1A = 4,
+    TIMER1_WAVEFORM_PWM_FAST_8 = 5,
+    TIMER1_WAVEFORM_PWM_FAST_9 = 6,
+    TIMER1_WAVEFORM_PWM_FAST_10 = 7,
+    TIMER1_WAVEFORM_PWM_PHASE_FREQ_CORRECT_ICR1 = 8,
+    TIMER1_WAVEFORM_PWM_PHASE_FREQ_CORRECT_OCR1A = 9,
+    TIMER1_WAVEFORM_PWM_PHASE_CORRECT_ICR1 = 10,
+    TIMER1_WAVEFORM_PWM_PHASE_CORRECT_OCR1A = 11,
+    TIMER1_WAVEFORM_CTC_ICR1 = 12,
+    TIMER1_WAVEFORM_PWM_FAST_ICR1 = 14,
+    TIMER1_WAVEFORM_PWM_FAST_OCR1A = 15
 } Timer1Waveform;
 
 typedef enum {
@@ -99,19 +104,8 @@ typedef enum {
     TIMER_CLOCK_EXTERNAL_RISING
 } TimerClock;
 
-void (*callback_timer1)(void);
-ISR(TIMER1_OVF_vect)
-{
-    if(callback_timer1)
-        callback_timer1();
-}
 
-void (*callback_timer2)(void);
-ISR(TIMER2_OVF_vect)
-{
-    if(callback_timer2)
-        callback_timer2();
-}
+// ===== TIMER0 PWM =====
 
 void timer0_init_as_pwm(void)
 {
@@ -122,7 +116,7 @@ void timer0_init_as_pwm(void)
     );
     reg_write_mask( // Control register A, channel B
         &TCCR0A, 0b00110000,
-        OUTPUT_COMPARE_MODE_CLEAR << 6
+        OUTPUT_COMPARE_MODE_CLEAR << 4
     );
 
     // Use waveform generation PWM fast, which with the
@@ -141,15 +135,18 @@ void timer0_init_as_pwm(void)
 
 void timer0_set_duty_cycle_a(float duty_cycle)
 {
-    uint8_t compare_value = (uint8_t)(duty_cycle * 255);
+    uint8_t compare_value = (uint8_t)(duty_cycle * 256);
     OCR0A = compare_value;
 }
 
 void timer0_set_duty_cycle_b(float duty_cycle)
 {
-    uint8_t compare_value = (uint8_t)(duty_cycle * 255);
+    uint8_t compare_value = (uint8_t)(duty_cycle * 256);
     OCR0B = compare_value;
 }
+
+
+// ===== TIMER0 Timer =====
 
 void (*callback_timer0)(void);
 uint64_t counter_timer0;
@@ -157,7 +154,7 @@ uint64_t counter_max_timer0;
 ISR(TIMER0_OVF_vect)
 {
     counter_timer0++;
-    if (counter_timer0 == counter_max_timer0) {
+    if (counter_timer0 >= counter_max_timer0) {
         if(callback_timer0)
             callback_timer0();
         counter_timer0 = 0;
@@ -176,10 +173,132 @@ void timer0_init_as_timer_ms(uint32_t ms, void (*callback)(void))
     reg_write_mask(&TCCR0A, 0b00110000, 0);
 
     // Normal timer/counter waveform
-    reg_write_mask(&TCCR0A, 0b00000011, 0);
+    reg_write_bit(&TCCR0B, WGM02, 0);
+    reg_write_bit(&TCCR0A, WGM01, 0);
+    reg_write_bit(&TCCR0A, WGM00, 0);
 
     uint8_t clock = TIMER_CLOCK_CLK;
     // With this, one clock period = 256/16MHz = 16us
     reg_write_mask(&TCCR0B, 0b00000111, clock);
+
+    counter_timer0 = 0;
+    counter_max_timer0 = ms * (F_CPU/1000)/256;
 }
 
+
+// ===== TIMER1 PWM =====
+
+void timer1_init_as_pwm(void)
+{
+    reg_write_mask(
+        &TCCR1A, 0b11000000,
+        OUTPUT_COMPARE_MODE_CLEAR << 6
+    );
+    reg_write_mask(
+        &TCCR1A, 0b00110000,
+        OUTPUT_COMPARE_MODE_CLEAR << 4
+    );
+    uint8_t waveform = TIMER1_WAVEFORM_PWM_FAST_10;
+    reg_write_bit(&TCCR1B, WGM13, (waveform & 0b1000) >> 3);
+    reg_write_bit(&TCCR1B, WGM12, (waveform & 0b0100) >> 2);
+    reg_write_bit(&TCCR1A, WGM11, (waveform & 0b0010) >> 1);
+    reg_write_bit(&TCCR1A, WGM10, (waveform & 0b0001) >> 0);
+
+    uint8_t clock = TIMER_CLOCK_CLK;
+    reg_write_mask(&TCCR1B, 0b00000111, clock);
+}
+
+void timer1_set_duty_cycle_a(float duty_cycle)
+{
+    uint16_t compare_value = (uint16_t)(duty_cycle * 1024);
+    OCR1A = compare_value;
+}
+
+void timer1_set_duty_cycle_b(float duty_cycle)
+{
+    uint16_t compare_value = (uint16_t)(duty_cycle * 1024);
+    OCR1B = compare_value;
+}
+
+
+// ===== TIMER1 Timer =====
+
+void (*callback_timer1)(void);
+uint64_t counter_timer1;
+uint64_t counter_max_timer1;
+ISR(TIMER1_OVF_vect)
+{
+    if(callback_timer1)
+        callback_timer1();
+}
+
+void timer1_init_as_timer_ms(uint32_t ms, void (*callback)(void))
+{
+    // Enable interrupts
+    sei();
+    reg_write_bit(&TIMSK1, TOIE1, 1);
+    callback_timer0 = callback;
+
+    // Don't use output compare on either channel
+    reg_write_mask(&TCCR1A, 0b11000000, 0);
+    reg_write_mask(&TCCR1A, 0b00110000, 0);
+
+    // Normal timer/counter waveform
+    reg_write_bit(&TCCR1B, WGM13, 0);
+    reg_write_bit(&TCCR1B, WGM12, 0);
+    reg_write_bit(&TCCR1A, WGM11, 0);
+    reg_write_bit(&TCCR1A, WGM10, 0);
+
+    uint8_t clock = TIMER_CLOCK_CLK;
+    // With this, one clock period = 256/16MHz = 16us
+    reg_write_mask(&TCCR1B, 0b00000111, clock);
+
+    counter_timer0 = 0;
+    counter_max_timer0 = ms * (F_CPU/1000)/655536;
+}
+
+
+// ===== TIMER2 PWM =====
+
+void timer2_init_as_pwm(void)
+{
+    reg_write_mask(
+        &TCCR2A, 0b11000000,
+        OUTPUT_COMPARE_MODE_CLEAR << 6
+    );
+    reg_write_mask(
+        &TCCR2A, 0b00110000,
+        OUTPUT_COMPARE_MODE_CLEAR << 4
+    );
+    uint8_t waveform = TIMER0_WAVEFORM_PWM_FAST;
+    reg_write_bit(&TCCR2B, WGM22, (waveform & 0b100) >> 2);
+    reg_write_bit(&TCCR2A, WGM21, (waveform & 0b010) >> 1);
+    reg_write_bit(&TCCR2A, WGM20, (waveform & 0b001) >> 0);
+
+    uint8_t clock = TIMER_CLOCK_CLK;
+    reg_write_mask(&TCCR2B, 0b00000111, clock);
+}
+
+void timer2_set_duty_cycle_a(float duty_cycle)
+{
+    uint8_t compare_value = (uint8_t)(duty_cycle * 256);
+    OCR2A = compare_value;
+}
+
+void timer2_set_duty_cycle_b(float duty_cycle)
+{
+    uint8_t compare_value = (uint8_t)(duty_cycle * 256);
+    OCR2B = compare_value;
+}
+
+
+// ===== TIMER2 Timer =====
+
+void (*callback_timer2)(void);
+uint64_t counter_timer2;
+uint64_t counter_max_timer2;
+ISR(TIMER2_OVF_vect)
+{
+    if(callback_timer2)
+        callback_timer2();
+}
