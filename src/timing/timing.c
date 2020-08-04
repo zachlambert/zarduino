@@ -126,6 +126,10 @@ typedef enum {
     TIMER2_CLOCK_CLK_DIV_1024
 } Timer2Clock;
 
+typedef enum {
+    TIMER1_INPUT_CAPTURE_FALLING,
+    TIMER1_INPUT_CAPTURE_RISING
+} Timer1InputCapture;
 
 // ===== TIMER0 PWM =====
 
@@ -238,11 +242,17 @@ void timer0_init_as_timer_accurate(void)
     reg_write_bit(&TIMSK0, TOIE0, 1);
 }
 
-uint64_t timer0_get_accurate_millis(void)
+uint64_t timer0_accurate_get_millis(void)
 {
     // counter_timer0 = units of (256/F_CPU) = 16us
     // Factor = 1ms / 16us = 62.5
     return (uint64_t)((float)counter_timer0 / 62.5f);
+}
+
+void timer0_accurate_reset(void)
+{
+    counter_timer0 = 0;
+    TCNT0 = 0;
 }
 
 // ===== TIMER1 PWM =====
@@ -338,6 +348,55 @@ void timer1_init_as_timer_ms(float ms, void (*callback)(void))
     }
 }
 
+uint8_t timer1_capture_level;
+uint16_t timer1_capture;
+ISR(TIMER1_CAPT_vect)
+{
+    if (timer1_capture_level) {
+        timer1_capture = ICR1;
+    }
+    TCCR1B ^= 1 << ICES1; // XOR, Inverts ICES1 bit
+    timer1_capture_level ^= 0x1;
+}
+
+void timer1_init_as_pulse_capture_us(void)
+{
+    reg_write_mask(&TCCR1A, 0b11000000, 0);
+    reg_write_mask(&TCCR1A, 0b00110000, 0);
+
+    //62.5ns resolution
+
+    // Enable interrupts
+    sei();
+    reg_write_bit(&TIMSK1, ICIE1, 1);
+
+    // Assume ICP1 starts at a low level, so set a
+    // rising edge to trigger the capture and interrupt.
+    reg_write_bit(
+        &TCCR1B, ICES1,
+        TIMER1_INPUT_CAPTURE_RISING & 0x1
+    );
+    timer1_capture_level = 0;
+
+    // Use CTC on ICR1 to reset the timer on input capture
+    uint8_t waveform = TIMER1_WAVEFORM_CTC_ICR1;
+    reg_write_bit(&TCCR1B, WGM13, (waveform & 0b1000) >> 3);
+    reg_write_bit(&TCCR1B, WGM12, (waveform & 0b0100) >> 2);
+    reg_write_bit(&TCCR1A, WGM11, (waveform & 0b0010) >> 1);
+    reg_write_bit(&TCCR1A, WGM10, (waveform & 0b0001) >> 0);
+
+    // Use x8 clock divider
+    // -> Resolution of 0.5us
+    // Can measure up to 0.5us * 2^16 = 32.768 ms
+    uint8_t clock = TIMER1_CLOCK_CLK_DIV_8;
+    reg_write_mask(&TCCR1B, 0b00000111, clock);
+}
+
+uint16_t timer1_get_pulse_length_us(void)
+{
+    // Units in 0.5us, so divide by 2
+    return timer1_capture/2;
+}
 
 // ===== TIMER2 PWM =====
 
