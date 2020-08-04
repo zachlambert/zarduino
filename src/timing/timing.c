@@ -173,9 +173,10 @@ void timer0_set_duty_cycle_b(float duty_cycle)
 void (*callback_timer0)(void);
 uint64_t counter_timer0;
 uint64_t counter_max_timer0;
+uint8_t timer0_exact = 0;
 ISR(TIMER0_OVF_vect)
 {
-    if (counter_timer0 == counter_max_timer0) {
+    if (!timer0_exact && counter_timer0 == counter_max_timer0) {
         reg_write_bit(&TIMSK0, OCIE0A, 1);
     }
     counter_timer0++;
@@ -219,6 +220,30 @@ void timer0_init_as_timer_ms(float ms, void (*callback)(void))
     }
 }
 
+void timer0_init_as_timer_accurate(void)
+{
+    reg_write_mask(&TCCR0A, 0b11000000, 0);
+    reg_write_mask(&TCCR0A, 0b00110000, 0);
+
+    reg_write_bit(&TCCR0B, WGM02, 0);
+    reg_write_bit(&TCCR0A, WGM01, 0);
+    reg_write_bit(&TCCR0A, WGM00, 0);
+
+    uint8_t clock = TIMER0_CLOCK_CLK;
+    reg_write_mask(&TCCR0B, 0b00000111, clock);
+
+    // Enable interrupts
+    sei();
+    timer0_exact = 1;
+    reg_write_bit(&TIMSK0, TOIE0, 1);
+}
+
+uint64_t timer0_get_accurate_millis(void)
+{
+    // counter_timer0 = units of (256/F_CPU) = 16us
+    // Factor = 1ms / 16us = 62.5
+    return (uint64_t)((float)counter_timer0 / 62.5f);
+}
 
 // ===== TIMER1 PWM =====
 
