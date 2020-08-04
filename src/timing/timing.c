@@ -175,26 +175,23 @@ uint64_t counter_timer0;
 uint64_t counter_max_timer0;
 ISR(TIMER0_OVF_vect)
 {
-    counter_timer0++;
     if (counter_timer0 == counter_max_timer0) {
         reg_write_bit(&TIMSK0, OCIE0A, 1);
     }
+    counter_timer0++;
 }
 ISR(TIMER0_COMPA_vect)
 {
     callback_timer0();
     TCNT0 = 0;
-    counter_timer0 = 0;
-    reg_write_bit(&TIMSK0, OCIE0A, 0);
+    if (counter_max_timer0) {
+        counter_timer0 = 0;
+        reg_write_bit(&TIMSK0, OCIE0A, 0);
+    }
 }
 
 void timer0_init_as_timer_ms(float ms, void (*callback)(void))
 {
-    // Enable interrupts
-    sei();
-    reg_write_bit(&TIMSK0, TOIE0, 1);
-    callback_timer0 = callback;
-
     // Don't use output compare on either channel
     reg_write_mask(&TCCR0A, 0b11000000, 0);
     reg_write_mask(&TCCR0A, 0b00110000, 0);
@@ -211,6 +208,15 @@ void timer0_init_as_timer_ms(float ms, void (*callback)(void))
     counter_timer0 = 0;
     counter_max_timer0 = clock_cycles / 256;
     OCR0A = clock_cycles % 256;
+
+    // Enable interrupts
+    sei();
+    callback_timer0 = callback;
+    if (counter_max_timer0) {
+        reg_write_bit(&TIMSK0, TOIE0, 1);
+    } else {
+        reg_write_bit(&TIMSK0, OCIE0A, 1);
+    }
 }
 
 
@@ -256,29 +262,28 @@ void timer1_set_duty_cycle_b(float duty_cycle)
 // However, such that the max time isn't limited, the timer
 // interrupts on compare match to achieve a certain period
 
+void (*callback_timer1)(void);
 uint64_t counter_timer1;
 uint64_t counter_max_timer1;
-void (*callback_timer1)(void);
+ISR(TIMER1_OVF_vect)
+{
+    if (counter_timer1 == counter_max_timer1) {
+        reg_write_bit(&TIMSK1, OCIE1A, 1);
+    }
+    counter_timer1++;
+}
 ISR(TIMER1_COMPA_vect)
 {
-    counter_timer1++;
-    if (counter_timer1 == counter_max_timer1) {
-        if(callback_timer1)
-            callback_timer1();
+    callback_timer1();
+    TCNT1 = 0;
+    if (counter_max_timer1) {
         counter_timer1 = 0;
-        // Also reset the timer
-        TCNT1 = 0;
+        reg_write_bit(&TIMSK1, OCIE1A, 0);
     }
 }
 
-void timer1_init_as_timer_ms(uint32_t ms, void (*callback)(void))
+void timer1_init_as_timer_ms(float ms, void (*callback)(void))
 {
-    // Enable interrupts
-    sei();
-    // Use 
-    reg_write_bit(&TIMSK1, OCIE1A, 1);
-    callback_timer1 = callback;
-
     // Don't need either output compare signal, but
     // will use the interrupt on compare match A
     reg_write_mask(&TCCR1A, 0b11000000, 0);
@@ -291,13 +296,21 @@ void timer1_init_as_timer_ms(uint32_t ms, void (*callback)(void))
     reg_write_bit(&TCCR1A, WGM11, (waveform & 0b0010) >> 1);
     reg_write_bit(&TCCR1A, WGM10, (waveform & 0b0001) >> 0);
 
-    uint8_t clock = TIMER1_CLOCK_CLK;
+    uint8_t clock = TIMER1_CLOCK_CLK_DIV_1024;
     reg_write_mask(&TCCR1B, 0b00000111, clock);
 
-    uint64_t clock_cycles = (F_CPU/1000)*ms;
+    uint64_t clock_cycles = (ms * F_CPU)/(1000.0f*1024);
     counter_timer1 = 0;
     counter_max_timer1 = clock_cycles / 65536;
     OCR1A = clock_cycles % 65536;
+    // Enable interrupts
+    sei();
+    callback_timer1 = callback;
+    if (counter_max_timer1) {
+        reg_write_bit(&TIMSK1, TOIE1, 1);
+    } else {
+        reg_write_bit(&TIMSK1, OCIE1A, 1);
+    }
 }
 
 
@@ -342,26 +355,23 @@ uint64_t counter_timer2;
 uint64_t counter_max_timer2;
 ISR(TIMER2_OVF_vect)
 {
-    counter_timer2++;
     if (counter_timer2 == counter_max_timer2) {
         reg_write_bit(&TIMSK2, OCIE2A, 1);
     }
+    counter_timer2++;
 }
 ISR(TIMER2_COMPA_vect)
 {
     callback_timer2();
     TCNT2 = 0;
-    counter_timer2 = 0;
-    reg_write_bit(&TIMSK2, OCIE2A, 0);
+    if (counter_max_timer2) {
+        counter_timer2 = 0;
+        reg_write_bit(&TIMSK2, OCIE2A, 0);
+    }
 }
 
 void timer2_init_as_timer_ms(float ms, void (*callback)(void))
 {
-    // Enable interrupts
-    sei();
-    reg_write_bit(&TIMSK2, TOIE2, 1);
-    callback_timer2 = callback;
-
     // Don't use output compare on either channel
     reg_write_mask(&TCCR2A, 0b11000000, 0);
     reg_write_mask(&TCCR2A, 0b00110000, 0);
@@ -374,8 +384,18 @@ void timer2_init_as_timer_ms(float ms, void (*callback)(void))
     uint8_t clock = TIMER2_CLOCK_CLK_DIV_1024;
     reg_write_mask(&TCCR2B, 0b00000111, clock);
 
-    uint64_t clock_cycles = (uint64_t)((ms * F_CPU)/(1000.0f*1024));
+    uint64_t clock_cycles = (ms * F_CPU)/(1000.0f*1024);
     counter_timer2 = 0;
     counter_max_timer2 = clock_cycles / 256;
     OCR2A = clock_cycles % 256;
+
+    // Enable interrupts
+    sei();
+    callback_timer2 = callback;
+    if (counter_max_timer2) {
+        reg_write_bit(&TIMSK2, TOIE2, 1);
+    } else {
+        reg_write_bit(&TIMSK2, OCIE2A, 1);
+    }
+
 }

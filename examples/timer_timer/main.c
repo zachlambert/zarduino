@@ -14,12 +14,12 @@ void callback0(void)
 void callback1(void)
 {
     num1++;
-    printf("Callbacks %lu %lu %lu\n", num0, num1, num2);    
 }
 
 void callback2(void)
 {
     num2++;
+    printf("Callbacks %lu %lu %lu\n", num0, num1, num2);    
 }
 
 int main(void)
@@ -27,9 +27,9 @@ int main(void)
     uart_init();
     printf("Starting\n");
 
-    timer0_init_as_timer_ms(100, callback0);
+    timer0_init_as_timer_ms(250, callback0);
     timer1_init_as_timer_ms(500, callback1);
-    timer2_init_as_timer_ms(100, callback2);
+    timer2_init_as_timer_ms(1000, callback2);
 
     while (1) {}
 }
