@@ -94,15 +94,37 @@ typedef enum {
 } Timer1Waveform;
 
 typedef enum {
-    TIMER_CLOCK_NONE,
-    TIMER_CLOCK_CLK,
-    TIMER_CLOCK_CLK_DIV_8,
-    TIMER_CLOCK_CLK_DIV_64,
-    TIMER_CLOCK_CLK_DIV_256,
-    TIMER_CLOCK_CLK_DIV_1024,
-    TIMER_CLOCK_EXTERNAL_FALLING,
-    TIMER_CLOCK_EXTERNAL_RISING
-} TimerClock;
+    TIMER0_CLOCK_NONE,
+    TIMER0_CLOCK_CLK,
+    TIMER0_CLOCK_CLK_DIV_8,
+    TIMER0_CLOCK_CLK_DIV_64,
+    TIMER0_CLOCK_CLK_DIV_256,
+    TIMER0_CLOCK_CLK_DIV_1024,
+    TIMER0_CLOCK_EXTERNAL_FALLING,
+    TIMER0_CLOCK_EXTERNAL_RISING
+} Timer0Clock;
+
+typedef enum {
+    TIMER1_CLOCK_NONE,
+    TIMER1_CLOCK_CLK,
+    TIMER1_CLOCK_CLK_DIV_8,
+    TIMER1_CLOCK_CLK_DIV_64,
+    TIMER1_CLOCK_CLK_DIV_256,
+    TIMER1_CLOCK_CLK_DIV_1024,
+    TIMER1_CLOCK_EXTERNAL_FALLING,
+    TIMER1_CLOCK_EXTERNAL_RISING
+} Timer1Clock;
+
+typedef enum {
+    TIMER2_CLOCK_NONE,
+    TIMER2_CLOCK_CLK,
+    TIMER2_CLOCK_CLK_DIV_8,
+    TIMER2_CLOCK_CLK_DIV_32,
+    TIMER2_CLOCK_CLK_DIV_64,
+    TIMER2_CLOCK_CLK_DIV_128,
+    TIMER2_CLOCK_CLK_DIV_256,
+    TIMER2_CLOCK_CLK_DIV_1024
+} Timer2Clock;
 
 
 // ===== TIMER0 PWM =====
@@ -129,7 +151,7 @@ void timer0_init_as_pwm(void)
     reg_write_bit(&TCCR0A, WGM00, (waveform & 0b001) >> 0);
 
     // Set clock source to CLK
-    uint8_t clock = TIMER_CLOCK_CLK;
+    uint8_t clock = TIMER0_CLOCK_CLK;
     reg_write_mask(&TCCR0B, 0b00000111, clock);
 }
 
@@ -154,14 +176,19 @@ uint64_t counter_max_timer0;
 ISR(TIMER0_OVF_vect)
 {
     counter_timer0++;
-    if (counter_timer0 >= counter_max_timer0) {
-        if(callback_timer0)
-            callback_timer0();
-        counter_timer0 = 0;
+    if (counter_timer0 == counter_max_timer0) {
+        reg_write_bit(&TIMSK0, OCIE0A, 1);
     }
 }
+ISR(TIMER0_COMPA_vect)
+{
+    callback_timer0();
+    TCNT0 = 0;
+    counter_timer0 = 0;
+    reg_write_bit(&TIMSK0, OCIE0A, 0);
+}
 
-void timer0_init_as_timer_ms(uint32_t ms, void (*callback)(void))
+void timer0_init_as_timer_ms(float ms, void (*callback)(void))
 {
     // Enable interrupts
     sei();
@@ -177,12 +204,13 @@ void timer0_init_as_timer_ms(uint32_t ms, void (*callback)(void))
     reg_write_bit(&TCCR0A, WGM01, 0);
     reg_write_bit(&TCCR0A, WGM00, 0);
 
-    uint8_t clock = TIMER_CLOCK_CLK;
-    // With this, one clock period = 256/16MHz = 16us
+    uint8_t clock = TIMER0_CLOCK_CLK_DIV_1024;
     reg_write_mask(&TCCR0B, 0b00000111, clock);
 
+    uint64_t clock_cycles = (ms * F_CPU)/(1000.0f*1024);
     counter_timer0 = 0;
-    counter_max_timer0 = ms * (F_CPU/1000)/256;
+    counter_max_timer0 = clock_cycles / 256;
+    OCR0A = clock_cycles % 256;
 }
 
 
@@ -204,7 +232,7 @@ void timer1_init_as_pwm(void)
     reg_write_bit(&TCCR1A, WGM11, (waveform & 0b0010) >> 1);
     reg_write_bit(&TCCR1A, WGM10, (waveform & 0b0001) >> 0);
 
-    uint8_t clock = TIMER_CLOCK_CLK;
+    uint8_t clock = TIMER1_CLOCK_CLK;
     reg_write_mask(&TCCR1B, 0b00000111, clock);
 }
 
@@ -223,38 +251,53 @@ void timer1_set_duty_cycle_b(float duty_cycle)
 
 // ===== TIMER1 Timer =====
 
-void (*callback_timer1)(void);
+// Since Timer1 is 16-bit, so need to use the compare
+// match interrupt.
+// However, such that the max time isn't limited, the timer
+// interrupts on compare match to achieve a certain period
+
 uint64_t counter_timer1;
 uint64_t counter_max_timer1;
-ISR(TIMER1_OVF_vect)
+void (*callback_timer1)(void);
+ISR(TIMER1_COMPA_vect)
 {
-    if(callback_timer1)
-        callback_timer1();
+    counter_timer1++;
+    if (counter_timer1 == counter_max_timer1) {
+        if(callback_timer1)
+            callback_timer1();
+        counter_timer1 = 0;
+        // Also reset the timer
+        TCNT1 = 0;
+    }
 }
 
 void timer1_init_as_timer_ms(uint32_t ms, void (*callback)(void))
 {
     // Enable interrupts
     sei();
-    reg_write_bit(&TIMSK1, TOIE1, 1);
-    callback_timer0 = callback;
+    // Use 
+    reg_write_bit(&TIMSK1, OCIE1A, 1);
+    callback_timer1 = callback;
 
-    // Don't use output compare on either channel
+    // Don't need either output compare signal, but
+    // will use the interrupt on compare match A
     reg_write_mask(&TCCR1A, 0b11000000, 0);
     reg_write_mask(&TCCR1A, 0b00110000, 0);
 
-    // Normal timer/counter waveform
-    reg_write_bit(&TCCR1B, WGM13, 0);
-    reg_write_bit(&TCCR1B, WGM12, 0);
-    reg_write_bit(&TCCR1A, WGM11, 0);
-    reg_write_bit(&TCCR1A, WGM10, 0);
+    // Can still use the normal waveform
+    uint8_t waveform = TIMER1_WAVEFORM_NORMAL;
+    reg_write_bit(&TCCR1B, WGM13, (waveform & 0b1000) >> 3);
+    reg_write_bit(&TCCR1B, WGM12, (waveform & 0b0100) >> 2);
+    reg_write_bit(&TCCR1A, WGM11, (waveform & 0b0010) >> 1);
+    reg_write_bit(&TCCR1A, WGM10, (waveform & 0b0001) >> 0);
 
-    uint8_t clock = TIMER_CLOCK_CLK;
-    // With this, one clock period = 256/16MHz = 16us
+    uint8_t clock = TIMER1_CLOCK_CLK;
     reg_write_mask(&TCCR1B, 0b00000111, clock);
 
-    counter_timer0 = 0;
-    counter_max_timer0 = ms * (F_CPU/1000)/655536;
+    uint64_t clock_cycles = (F_CPU/1000)*ms;
+    counter_timer1 = 0;
+    counter_max_timer1 = clock_cycles / 65536;
+    OCR1A = clock_cycles % 65536;
 }
 
 
@@ -275,7 +318,7 @@ void timer2_init_as_pwm(void)
     reg_write_bit(&TCCR2A, WGM21, (waveform & 0b010) >> 1);
     reg_write_bit(&TCCR2A, WGM20, (waveform & 0b001) >> 0);
 
-    uint8_t clock = TIMER_CLOCK_CLK;
+    uint8_t clock = TIMER2_CLOCK_CLK;
     reg_write_mask(&TCCR2B, 0b00000111, clock);
 }
 
@@ -299,6 +342,40 @@ uint64_t counter_timer2;
 uint64_t counter_max_timer2;
 ISR(TIMER2_OVF_vect)
 {
-    if(callback_timer2)
-        callback_timer2();
+    counter_timer2++;
+    if (counter_timer2 == counter_max_timer2) {
+        reg_write_bit(&TIMSK2, OCIE2A, 1);
+    }
+}
+ISR(TIMER2_COMPA_vect)
+{
+    callback_timer2();
+    TCNT2 = 0;
+    counter_timer2 = 0;
+    reg_write_bit(&TIMSK2, OCIE2A, 0);
+}
+
+void timer2_init_as_timer_ms(float ms, void (*callback)(void))
+{
+    // Enable interrupts
+    sei();
+    reg_write_bit(&TIMSK2, TOIE2, 1);
+    callback_timer2 = callback;
+
+    // Don't use output compare on either channel
+    reg_write_mask(&TCCR2A, 0b11000000, 0);
+    reg_write_mask(&TCCR2A, 0b00110000, 0);
+
+    // Normal timer/counter waveform
+    reg_write_bit(&TCCR2B, WGM22, 0);
+    reg_write_bit(&TCCR2A, WGM21, 0);
+    reg_write_bit(&TCCR2A, WGM20, 0);
+
+    uint8_t clock = TIMER2_CLOCK_CLK_DIV_1024;
+    reg_write_mask(&TCCR2B, 0b00000111, clock);
+
+    uint64_t clock_cycles = (uint64_t)((ms * F_CPU)/(1000.0f*1024));
+    counter_timer2 = 0;
+    counter_max_timer2 = clock_cycles / 256;
+    OCR2A = clock_cycles % 256;
 }
