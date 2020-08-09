@@ -1,5 +1,6 @@
 #include "comms/spi.h"
 #include "core/regs.h"
+#include "core/pin_data.h"
 
 #include <avr/io.h>
 
@@ -16,7 +17,7 @@ SPIConfig spi_create_config(void)
     return config;
 }
 
-void spi_init(SPIConfig *config)
+void spi_init_master(SPIConfig *config)
 {
     reg_write_bit(&SPCR, SPE, 1);
     reg_write_bit(&SPCR, DORD, config->data_order);
@@ -27,32 +28,45 @@ void spi_init(SPIConfig *config)
         callback = config->callback;
         reg_write_bit(&SPCR, SPIE, 1);
     }
+    gpio_mode_output(PIN_SS);
+    gpio_mode_output(PIN_SCK);
+    gpio_mode_output(PIN_MOSI);
 }
 
-uint8_t spi_read_byte(void)
+uint8_t spi_read_byte(Pin CS)
 {
+    uint8_t value;
+    gpio_write(CS, 0);
     while(!reg_read_bit(&SPSR, SPIF));
-    return SPDR;
+    value = SPDR;
+    gpio_write(CS, 1);
+    return value;
 }
 
-void spi_write_byte(uint8_t data)
+void spi_write_byte(Pin CS, uint8_t data)
 {
+    gpio_write(CS, 0);
     SPDR = data;
     while(!reg_read_bit(&SPSR, SPIF));
+    gpio_write(CS, 1);
 }
 
-void spi_read_bytes(uint8_t *data, size_t len)
+void spi_read_bytes(Pin CS, uint8_t *data, size_t len)
 {
+    gpio_write(CS, 0);
     for (size_t i = 0; i < len; i++) {
         while(!reg_read_bit(&SPSR, SPIF));
         data[i] = SPDR;
     }
+    gpio_write(CS, 1);
 }
 
-void spi_write_bytes(uint8_t *data, size_t len)
+void spi_write_bytes(Pin CS, uint8_t *data, size_t len)
 {
+    gpio_write(CS, 0);
     for (size_t i = 0; i < len; i++) {
         SPDR = data[i];
         while(!reg_read_bit(&SPSR, SPIF));
     }
+    gpio_write(CS, 1);
 }

@@ -13,6 +13,6 @@ int main(void)
     uart_init();
     SPIConfig config = spi_create_config();
     config.callback = callback;
-    spi_init(&config);
+    spi_init_master(&config);
     while (1) {}
 }

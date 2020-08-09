@@ -1,6 +1,8 @@
 #ifndef ZARDUINO_COMMS_SPI
 #define ZARDUINO_COMMS_SPI
 
+#include "core/pins.h"
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -39,10 +41,10 @@ typedef struct {
 } SPIConfig;
 
 SPIConfig spi_create_config(void);
-void spi_init(SPIConfig *config);
-uint8_t spi_read_byte(void);
-void spi_write_byte(uint8_t data);
-void spi_read_bytes(uint8_t *data, size_t len);
-void spi_write_bytes(uint8_t *data, size_t len);
+void spi_init_master(SPIConfig *config);
+uint8_t spi_read_byte(Pin CS);
+void spi_write_byte(Pin CS, uint8_t data);
+void spi_read_bytes(Pin CS, uint8_t *data, size_t len);
+void spi_write_bytes(Pin CS, uint8_t *data, size_t len);
 
 #endif

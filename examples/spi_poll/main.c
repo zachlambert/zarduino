@@ -6,7 +6,7 @@ int main(void)
 {
     uart_init();
     SPIConfig config = spi_create_config();
-    spi_init(&config);
+    spi_init_master(&config);
     while (1) {
         printf("%d\n", spi_read_byte());
         delay(100);
