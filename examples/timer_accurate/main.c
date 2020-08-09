@@ -11,7 +11,7 @@ int main(void)
 
     timer0_init_as_timer_accurate();
     while (1) {
-        printf("Millis: %lu\n", timer0_get_accurate_millis());
+        printf("Ticks: %lu\n", (uint32_t)timer0_accurate_get_ticks());
         delay(500);
     }
 }

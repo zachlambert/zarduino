@@ -242,11 +242,16 @@ void timer0_init_as_timer_accurate(void)
     reg_write_bit(&TIMSK0, TOIE0, 1);
 }
 
-uint64_t timer0_accurate_get_millis(void)
+uint64_t timer0_accurate_get_ticks(void)
 {
     // counter_timer0 = units of (256/F_CPU) = 16us
     // Factor = 1ms / 16us = 62.5
-    return (uint64_t)((float)counter_timer0 / 62.5f);
+    // Units are 1/F_CPU = 62.5ns
+    // Overflows if counter_timer0 > 2^64/256 = 2^56
+    // 2^56 ~= 7*10^16 (unit 62.5ns)
+    //       = 4.375*10^9 seconds
+    //       = 138 years
+    return counter_timer0 * 255 + TCNT0;
 }
 
 void timer0_accurate_reset(void)
