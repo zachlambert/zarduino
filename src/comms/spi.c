@@ -28,7 +28,8 @@ void spi_init_master(SPIConfig *config)
         callback = config->callback;
         reg_write_bit(&SPCR, SPIE, 1);
     }
-    gpio_mode_output(PIN_SS);
+    // User has to choose their own chip select pin
+    // and set it as an output
     gpio_mode_output(PIN_SCK);
     gpio_mode_output(PIN_MOSI);
 }
@@ -67,6 +68,28 @@ void spi_write_bytes(Pin CS, uint8_t *data, size_t len)
     for (size_t i = 0; i < len; i++) {
         SPDR = data[i];
         while(!reg_read_bit(&SPSR, SPIF));
+    }
+    gpio_write(CS, 1);
+}
+
+uint8_t spi_transfer_byte(Pin CS, uint8_t data_in)
+{
+    gpio_write(CS, 0);
+    SPDR = data_in;
+    while(!reg_read_bit(&SPSR, SPIF));
+    uint8_t data_out = SPDR;
+    gpio_write(CS, 1);
+    return data_out;
+}
+
+void spi_transfer_bytes(
+    Pin CS, uint8_t *data_in, uint8_t *data_out, size_t len
+){
+    gpio_write(CS, 0);
+    for (size_t i = 0; i < len; i++) {
+        SPDR = data_in[i];
+        while(!reg_read_bit(&SPSR, SPIF));
+        data_out[i] = SPDR;
     }
     gpio_write(CS, 1);
 }
