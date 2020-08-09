@@ -17,6 +17,7 @@ add_library(zarduino
     src/comms/uart.c
     src/core/interrupt.c
     src/timing/timing.c
+    src/comms/spi.c
 )
 target_include_directories(zarduino
     PUBLIC include
