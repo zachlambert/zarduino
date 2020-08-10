@@ -1,17 +1,27 @@
-#include "comms/spi.h"
 #include "comms/uart.h"
 #include "timing/delay.h"
+#include "core/pins.h"
+#include "comms/spi.h"
 
 int main(void)
 {
-    uart_init();
-
-    Pin SS = PIN_SS;
     SPIConfig config = spi_create_config();
     spi_init_master(&config);
-    gpio_mode_output(SS);
+
+    Pin CSN = PIN_D6;
+    gpio_mode_output(CSN);
+    gpio_write(CSN, 1);
+
+    uart_init();
+
+    delay(100);
+
     while (1) {
-        printf("%d\n", spi_read_byte(SS));
-        delay(100);
+        gpio_write(CSN, 0);
+        uint8_t read = spi_transfer(0xFF);
+        gpio_write(CSN, 1);
+        printf("Read: %d\n", read);
+        // printf("%d\n", spi_read_byte(SS));
+        delay(500);
     }
 }

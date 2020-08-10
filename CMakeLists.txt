@@ -18,7 +18,7 @@ add_library(zarduino
     src/core/interrupt.c
     src/timing/timing.c
     src/comms/spi.c
-    src/modules/radio.c
+    src/module/radio.c
 )
 target_include_directories(zarduino
     PUBLIC include
