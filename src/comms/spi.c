@@ -36,10 +36,26 @@ void spi_init_master(SPIConfig *config)
     gpio_mode_output(PIN_MOSI);
 }
 
-uint8_t spi_transfer(uint8_t data_in)
+uint8_t spi_transfer_byte(Pin CS, uint8_t data_in)
 {
+    gpio_write(CS, 0);
     SPDR = data_in;
     asm volatile("nop");
     while(!reg_read_bit(&SPSR, SPIF));
+    gpio_write(CS, 1);
     return SPDR;
+}
+
+void spi_transfer_bytes(
+    Pin CS, uint8_t *data_in, uint8_t *data_out, size_t num_bytes
+){
+    gpio_write(CS, 0);
+    for (size_t i = 0; i < num_bytes; i++) {
+        SPDR = data_in[i];
+        asm volatile("nop");
+        while(!reg_read_bit(&SPSR, SPIF));
+        if (data_out)
+            data_out[i] = SPDR;
+    }
+    gpio_write(CS, 1);
 }

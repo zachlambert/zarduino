@@ -41,6 +41,9 @@ typedef struct {
 
 SPIConfig spi_create_config(void);
 void spi_init_master(SPIConfig *config);
-uint8_t spi_transfer(uint8_t data_in);
+uint8_t spi_transfer_byte(Pin CS, uint8_t data_in);
+void spi_transfer_bytes(
+    Pin CS, uint8_t *data_in, uint8_t *data_out, size_t num_bytes
+);
 
 #endif
