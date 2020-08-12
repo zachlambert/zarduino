@@ -22,26 +22,6 @@ int main(void)
     // RX/TX mode
     // Must be low when setting register values
 
-    // Set retries to delay 5, count 15
-    write_register(0x04, (5 & 0xf) << 4 | (15 & 0xf));
-
-    // Set data rate to 1MBPS
-    uint8_t setup = read_register(0x06);
-    setup &= ~(1<<5 | 1<<3);
-    txDelay = 85;
-    write_register(0x06, setup);
-
-    // Write to registers to configure the device
-    // Can only be done in power down or standby modes
-    // 0x00: Configuration register
-    // - Set PWR_UP -> Power up
-    // - Set PRIM_RX -> RX mode (when CE set high)
-    // - By default, EN_CRC (bit 3) is set
-    uint8_t config_value =
-        0 << 0 | // PRIM_RX = 0
-        1 << 1 | // PWR_UP
-        1 << 3;  // CRC, already set, so don't change
-    write_register(0x00, config_value);
 
     // 0x02: Enable RX addresses
     // - Leave default, data pipe 0 and 1 are enabled
