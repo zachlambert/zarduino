@@ -20,4 +20,5 @@ add_example(timer_pulse)
 add_example(spi_read_byte)
 add_example(spi_read_bytes)
 
-# add_example(module_radio)
+add_example(module_radio_rx)
+add_example(module_radio_tx)
