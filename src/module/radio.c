@@ -93,7 +93,7 @@ void radio_stop(RadioConfig *config)
     gpio_write(config->CE, 0);
 }
 
-uint8_t read_rx_byte(RadioConfig *config)
+uint8_t radio_read_rx(RadioConfig *config)
 {
     uint8_t data_in[] = {command_R_RX_PAYLOAD, command_NOP};
     uint8_t data_out[2];
@@ -101,7 +101,7 @@ uint8_t read_rx_byte(RadioConfig *config)
     return data_out[1];
 }
 
-void write_tx_byte(RadioConfig *config, uint8_t value)
+void radio_write_tx(RadioConfig *config, uint8_t value)
 {
     uint8_t data_in[] = {command_W_TX_PAYLOAD, value};
     spi_transfer_bytes(config->CSN, data_in, 0, 2);

@@ -2,8 +2,9 @@
 #include "core/pins.h"
 #include "comms/uart.h"
 #include "comms/spi.h"
-#include <stdint.h>
 #include "timing/delay.h"
+
+#include <stdint.h>
 
 int main(void)
 {
@@ -14,35 +15,19 @@ int main(void)
 
     RadioConfig radio_config = radio_create_config();
     radio_config.CSN = PIN_D6;
-    gpio_mode_output(radio_config.CSN);
-    gpio_write(radio_config.CSN, 1);
-
     radio_config.CE = PIN_D8;
-    // CE is active high and puts the device into
-    // RX/TX mode
-    // Must be low when setting register values
+    radio_config.IRQ = 0;
 
+    radio_init(&radio_config);
+    radio_set_mode_tx(&radio_config);
 
-    // 0x02: Enable RX addresses
-    // - Leave default, data pipe 0 and 1 are enabled
-
-    // 0x03: Pipe address lengths
-    // - Leave default, length 5 bits
-
-    // uint8_t tx_address = 0b00001;
-    // write_register(0x10, tx_address);
-    // 0x0A: Set pipe 0 address
-    // - 5 bits, set to 00001
-
-    delay(100);
-
-    // Set CE high
-    gpio_write(CE, 1);
+    delay(10);
+    radio_start(&radio_config);
 
     uint8_t data_out = 0x55;
     while (1) {
         printf("Sending %d\n", data_out);
-        write_tx_byte(data_out);
+        radio_write_tx(&radio_config, data_out);
         delay(100);
     }
 }

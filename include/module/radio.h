@@ -28,8 +28,10 @@ void radio_register_write(
     uint8_t value
 );
 
-uint8_t read_rx_byte(RadioConfig *config);
-void write_tx_byte(RadioConfig *config, uint8_t value);
+uint8_t radio_read_rx(RadioConfig *config);
+void radio_write_tx(RadioConfig *config, uint8_t value);
 
+void radio_start(RadioConfig *config);
+void radio_stop(RadioConfig *config);
 
 #endif
