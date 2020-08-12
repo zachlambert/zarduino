@@ -5,38 +5,6 @@
 #include <stdint.h>
 #include "timing/delay.h"
 
-Pin CSN;
-Pin CE;
-
-void write_register(uint8_t address, uint8_t value)
-{
-    uint8_t data_in[] = {
-        (address & 0x1F) | 1<<5,
-        value
-    };
-    spi_transfer_bytes(CSN, data_in, 0, 2);
-}
-
-uint8_t read_register(uint8_t address)
-{
-    uint8_t data_in[] = {
-        (address & 0x1F),
-        0xFF
-    };
-    uint8_t data_out[2];
-    spi_transfer_bytes(CSN, data_in, data_out, 2);
-    return data_out[1];
-}
-
-void write_tx_byte(uint8_t value)
-{
-    uint8_t data_in[] = {
-        0b10100000,
-        value
-    };
-    spi_transfer_bytes(CSN, data_in, 0, 2);
-}
-
 int main(void)
 {
     uart_init();
@@ -44,11 +12,12 @@ int main(void)
     SPIConfig spi_config = spi_create_config();
     spi_init_master(&spi_config);
 
-    CSN = PIN_D6;
-    gpio_mode_output(CSN);
-    gpio_write(CSN, 1);
+    RadioConfig radio_config = radio_create_config();
+    radio_config.CSN = PIN_D6;
+    gpio_mode_output(radio_config.CSN);
+    gpio_write(radio_config.CSN, 1);
 
-    CE = PIN_D8;
+    radio_config.CE = PIN_D8;
     // CE is active high and puts the device into
     // RX/TX mode
     // Must be low when setting register values
