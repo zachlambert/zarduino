@@ -3,65 +3,7 @@
 #include "core/pins.h"
 #include "comms/uart.h"
 
-const uint8_t command_R_REGISTER(uint8_t address) {
-    return address & 0x1F;
-}
-const uint8_t command_W_REGISTER(uint8_t address) {
-    return (address & 0x1F) | 1<<5;
-}
-
-const uint8_t command_R_RX_PAYLOAD = 0b01100001;
-const uint8_t command_W_TX_PAYLOAD = 0b10100000;
-const uint8_t command_FLUSH_TX = 0b11100001;
-const uint8_t command_FLUSH_RX = 0b11100010;
-const uint8_t command_REUSE_TX_PL = 0b11100011;
-
-// Must execute the ACTIVATE command, to enable any
-// of the commands below it
-const uint8_t command_ACTIVATE = 0b01010000;
-const uint8_t command_R_RX_PL_WID = 0b01100000;
-const uint8_t command_W_ACK_PAYLOAD(uint8_t pipe) {
-    return (pipe & 0x7) | 0b10101000;
-}
-const uint8_t command_W_TX_PAYLOAD_NO_ACK = 0b10110000;
-const uint8_t command_NOP = 0xFF;
-
-
-const uint8_t register_CONFIG = 0x00;
-const uint8_t register_EN_AA = 0x01;
-const uint8_t register_EN_RXADDR = 0x02;
-const uint8_t register_SETUP_AW = 0x03;
-const uint8_t register_SETUP_RETR = 0x04;
-const uint8_t register_RF_CH = 0x05;
-const uint8_t register_RF_SETUP = 0x06;
-const uint8_t register_STATUS = 0x07;
-const uint8_t register_OBSERVE_TX = 0x08;
-const uint8_t register_CD = 0x09;
-
-const uint8_t register_RX_ADDR_P0 = 0x0A;
-const uint8_t register_RX_ADDR_P1 = 0x0B;
-const uint8_t register_RX_ADDR_P2 = 0x0C;
-const uint8_t register_RX_ADDR_P3 = 0x0D;
-const uint8_t register_RX_ADDR_P4 = 0x0E;
-const uint8_t register_RX_ADDR_P5 = 0x0F;
-const uint8_t register_TX_ADDR = 0x10;
-
-const uint8_t register_RX_PW_P0 = 0x11;
-const uint8_t register_RX_PW_P1 = 0x12;
-const uint8_t register_RX_PW_P2 = 0x13;
-const uint8_t register_RX_PW_P3 = 0x14;
-const uint8_t register_RX_PW_P4 = 0x15;
-const uint8_t register_RX_PW_P5 = 0x16;
-
-const uint8_t register_FIFO_STATUS = 0x17;
-
-const uint8_t MASK_RX_DR = 1<<6;
-const uint8_t MASK_TX_DS = 1<<5;
-const uint8_t MASK_MAX_RT = 1<<4;
-const uint8_t EN_CRC = 1<<3;
-const uint8_t CRCO = 1<<2;
-const uint8_t PWR_UP = 1<<1;
-const uint8_t PRIM_RX = 1<<0;
+#include "module/radio_constants.h"
 
 RadioConfig radio_create_config(void)
 {
