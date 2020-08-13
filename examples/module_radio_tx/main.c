@@ -24,10 +24,10 @@ int main(void)
     delay(10);
     radio_start(&radio_config);
 
-    uint8_t data_out = 0x55;
+    uint8_t data_out = 0;
     while (1) {
-        printf("Sending %d\n", data_out);
-        radio_write_tx(&radio_config, data_out);
-        delay(100);
+        printf("Sending %x\n", data_out);
+        radio_write_tx(&radio_config, data_out++);
+        delay(50);
     }
 }

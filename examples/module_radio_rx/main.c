@@ -24,9 +24,10 @@ int main(void)
     delay(10);
     radio_start(&radio_config);
 
+    uint8_t value = 0xFF;
     while (1) {
-        uint8_t value = radio_read_rx(&radio_config);
-        printf("%x\n", value);
-        delay(100);
+        value = radio_read_rx(&radio_config);
+        printf("Received %x\n", value);
+        delay(50);
     }
 }
