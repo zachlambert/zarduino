@@ -86,45 +86,70 @@ void radio_init(RadioConfig *config)
     // Used over many modules, so the main program should
     // handle SPI initialisation when its needed.
 
-    // Set retries
-    // uint8_t ard_value = 5;
-    // uint8_t arc_value = 15;
-    // radio_register_write(
-    //     config,
-    //     register_SETUP_RETR,
-    //     (ard_value & ARD_mask) << ARD_shift |
-    //         (arc_value & ARC_mask) << ARC_shift
-    // );
+    // Ensure the radio is in standby/power down mode
+    // by ensuring CE is low. Should be 0 anyway.
+    gpio_write(config->CE, 0);
 
-    // // Set data rate to 1MBPS
-    // uint8_t rf_setup = radio_register_read(
-    //     config, register_RF_SETUP
-    // );
-    // rf_setup &= ~(1<<3); // 1MBps instead of default 2
-    // radio_register_write(config, register_RF_SETUP, rf_setup);
+    // 0x00 CONFIG
+    uint8_t config_reg = 0;
+    config_reg |= config->interrupt_en_rx << MASK_RX_DR;
+    config_reg |= config->interrupt_en_tx_ack << MASK_TX_DS;
+    config_reg |= config->interrupt_en_max_retransmit << MASK_MAX_RT;
+    config_reg |= config->en_crc << EN_CRC;
+    config_reg |= config->crc << CRCO;
+    radio_register_write(config, register_CONFIG, config_reg);
+    
+    // 0x02 EN_RXADDR
+    uint8_t en_rxaddr_reg = 0;
+    for (size_t i = 0; i < 6; i++) {
+        en_rxaddr_reg |= config->rx_config[i].en << i;
+    }
+    radio_register_write(config, register_EN_RXADDR, en_rxaddr_reg);
+
+    // 0x03 SETUP_AW
+    uint8_t setup_aw_reg = (config->address_width & AW_mask) << AW_shift;
+    radio_register_write(
+        config,
+        register_SETUP_AW,
+        setup_aw_reg
+    );
+
+    // 0x04 SETUP_RETR
+    uint8_t setup_retr_reg = 0;
+    setup_retr_reg |= (config->auto_retransmit_delay & ARD_mask) << ARD_shift;
+    setup_retr_reg |= (config->auto_retransmit_count & ARC_mask) << ARC_shift;
+
+    radio_register_write(config, register_SETUP_RETR, setup_retr_reg);
+
+    // 0x05 RF_CH
+    uint8_t rf_ch_reg = (config->frequency_channel & RF_CH_mask) << RF_CH_shift;
+    radio_register_write(config, register_RF_CH, rf_ch_reg);
+
+    // 0x06 RF_SETUP
+    uint8_t rf_setup_reg = 0;
+    rf_setup_reg |= config->air_data_rate << RF_DR;
+
+    // 0x0A -> 0x0F RX_ADDR_P0 -> RX_ADDR_P5
+    // TODO Need multiple byte write
+    
+    // 0x10 TX_ADDR
+    // TODO Need multiple byte write
+
+    // 0x11 -> 0x16 RX_PW_P0 -> RX_RW_P5
+    for (size_t i = 0; i < 6; i++) {
+        radio_register_write(
+            config,
+            register_RX_PW_P0 + i,
+            (config->rx_config[i].payload_size & RX_PW_P0_mask) << RX_PW_P0_shift
+        );
+    }
 
     // Reset the status register
     radio_reset_status(config);
 
-    // Set channel
-
-    // uint8_t channel_freq = 1;
-    // radio_register_write(
-    //     config,
-    //     register_RF_CH,
-    //     (channel_freq & RF_CH_mask) << RF_CH_shift
-    // );
-
     // Flush buffers
     spi_transfer_byte(config->CSN, command_FLUSH_RX);
     spi_transfer_byte(config->CSN, command_FLUSH_TX);
-
-    // Clear config
-    radio_register_write(
-        config,
-        register_CONFIG,
-        1 << EN_CRC | 1 << CRCO
-    );
 
     // Power up
     uint8_t reg_config = radio_register_read(config, register_CONFIG);
