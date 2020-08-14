@@ -29,7 +29,38 @@ void radio_register_write(RadioConfig *config, uint8_t address, uint8_t value)
 RadioConfig radio_create_config(void)
 {
     RadioConfig config = {};
-    // Put some default values
+
+    // Use the same default values as those used by
+    // the device, except for payload size of the default
+    // enabled RX pipes
+
+    config.interrupt_en_rx = 1;
+    config.interrupt_en_tx_ack = 1;
+    config.interrupt_en_max_retransmit = 1;
+    config.en_crc = 1;
+    config.crc = RADIO_CONFIG_CRC_1BYTE;
+    config.address_width = RADIO_CONFIG_ADDRESS_WIDTH_5;
+    config.auto_retransmit_delay = 0;
+    config.auto_retransmit_count = 3;
+    config.frequency_channel = 2;
+    config.air_data_rate = RADIO_CONFIG_AIR_DATA_RATE_2MBPS;
+    config.output_power = RADIO_CONFIG_OUTPUT_POWER_0DB;
+
+    config.rx_config[0].address = 0xE7E7E7E7E7;
+    config.rx_config[0].payload_size = 1;
+    config.rx_config[0].en = 1;
+
+    config.rx_config[1].address = 0xC2C2C2C2C2;
+    config.rx_config[1].payload_size = 1;
+    config.rx_config[1].en = 1;
+
+    config.rx_config[2].address = 0xC3;
+    config.rx_config[3].address = 0xC4;
+    config.rx_config[4].address = 0xC5;
+    config.rx_config[5].address = 0xC6;
+
+    config.tx_address = 0xE7E7E7E7E7;
+
     return config;
 }
 
