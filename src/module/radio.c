@@ -9,8 +9,8 @@
 uint8_t radio_register_read(RadioConfig *config, uint8_t address)
 {
     uint8_t data_in[] = {
-        (address & 0x1F),
-        0xFF
+        command_R_REGISTER(address),
+        command_NOP
     };
     uint8_t data_out[2];
     spi_transfer_bytes(config->CSN, data_in, data_out, 2);
@@ -20,7 +20,7 @@ uint8_t radio_register_read(RadioConfig *config, uint8_t address)
 void radio_register_write(RadioConfig *config, uint8_t address, uint8_t value)
 {
     uint8_t data_in[] = {
-        (address & 0x1F) | 1<<5,
+        command_W_REGISTER(address),
         value
     };
     spi_transfer_bytes(config->CSN, data_in, 0, 2);
@@ -33,56 +33,56 @@ RadioConfig radio_create_config(void)
     return config;
 }
 
-void radio_init(RadioConfig *config)
+void radio_reset_status(RadioConfig *config)
 {
-    // === RF24::begin() ===
-    // == GPIO ==
-
-    gpio_mode_output(config->CE);
-    gpio_mode_output(config->CSN);
-    gpio_mode_input(config->IRQ);
-    gpio_write(config->CSN, 1);
-
-    // SPI
-    // Already enabled externally
-
-    // Set retries
-
-    uint8_t ard_value = 5;
-    uint8_t arc_value = 15;
-    radio_register_write(
-        config,
-        register_SETUP_RETR,
-        (ard_value & ARD_mask) << ARD_shift |
-            (arc_value & ARC_mask) << ARC_shift
-    );
-
-    // Set data rate to 1MBPS
-    uint8_t rf_setup = radio_register_read(
-        config, register_RF_SETUP
-    );
-    rf_setup &= ~(1<<3); // 1MBps instead of default 2
-    radio_register_write(config, register_RF_SETUP, rf_setup);
-
-    // Set the txDelay
-    uint8_t txDelay = 85;
-
-    // Reset the status register
-
     radio_register_write(
         config,
         register_STATUS,
         1<<RX_DR | 1<<TX_DS | 1<<MAX_RT
     );
+}
+
+void radio_init(RadioConfig *config)
+{
+    // GPIO
+    gpio_mode_output(config->CE);
+    gpio_mode_output(config->CSN);
+    if (config->IRQ)
+        gpio_mode_input(config->IRQ);
+    gpio_write(config->CSN, 1);
+
+    // SPI
+    // Used over many modules, so the main program should
+    // handle SPI initialisation when its needed.
+
+    // Set retries
+    // uint8_t ard_value = 5;
+    // uint8_t arc_value = 15;
+    // radio_register_write(
+    //     config,
+    //     register_SETUP_RETR,
+    //     (ard_value & ARD_mask) << ARD_shift |
+    //         (arc_value & ARC_mask) << ARC_shift
+    // );
+
+    // // Set data rate to 1MBPS
+    // uint8_t rf_setup = radio_register_read(
+    //     config, register_RF_SETUP
+    // );
+    // rf_setup &= ~(1<<3); // 1MBps instead of default 2
+    // radio_register_write(config, register_RF_SETUP, rf_setup);
+
+    // Reset the status register
+    radio_reset_status(config);
 
     // Set channel
 
-    uint8_t channel_freq = 1;
-    radio_register_write(
-        config,
-        register_RF_CH,
-        (channel_freq & RF_CH_mask) << RF_CH_shift
-    );
+    // uint8_t channel_freq = 1;
+    // radio_register_write(
+    //     config,
+    //     register_RF_CH,
+    //     (channel_freq & RF_CH_mask) << RF_CH_shift
+    // );
 
     // Flush buffers
     spi_transfer_byte(config->CSN, command_FLUSH_RX);

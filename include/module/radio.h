@@ -5,7 +5,17 @@
 
 #include "core/pins.h"
 
+typedef enum {
+    RADIO_CONFIG_CRC_1BYTE,
+    RADIO_CONFIG_CRC_2BYTES
+} RadioConfigCrc;
+
 typedef struct {
+    uint8_t interrupt_en_rx : 1;
+    uint8_t interrupt_en_tx_ack : 1;
+    uint8_t interrupt_en_max_retransmit : 1;
+    uint8_t en_crc : 1;
+    RadioConfigCrc crc;
     Pin CE;
     Pin CSN;
     Pin IRQ;

@@ -7,7 +7,6 @@
 
 void gpio_mode_input(Pin pin)
 {
-    if (!pin) return;
     PinData *data = (PinData*)pin;
     reg_write_bit(data->output_reg, data->bit, 0);
     reg_write_bit(data->direction_reg, data->bit, 0);
@@ -15,7 +14,6 @@ void gpio_mode_input(Pin pin)
 
 void gpio_mode_input_pullup(Pin pin)
 {
-    if (!pin) return;
     PinData *data = (PinData*)pin;
     // Disabled if PUD flag is set (pull-up disable)
     reg_write_bit(data->output_reg, data->bit, 1);
@@ -24,7 +22,6 @@ void gpio_mode_input_pullup(Pin pin)
 
 void gpio_mode_output(Pin pin)
 {
-    if (!pin) return;
     PinData *data = (PinData*)pin;
     // Sourcing input
     // When the bit is set, the output is pulled high
@@ -34,7 +31,6 @@ void gpio_mode_output(Pin pin)
 
 void gpio_mode_output_inverse(Pin pin)
 {
-    if (!pin) return;
     PinData *data = (PinData*)pin;
     // Sinking input
     // When the bit is set, the output is pulled low
@@ -44,14 +40,12 @@ void gpio_mode_output_inverse(Pin pin)
 
 void gpio_write(Pin pin, uint8_t value)
 {
-    if (!pin) return;
     PinData *data = (PinData*)pin;
     reg_write_bit(data->output_reg, data->bit, value);
 }
 
 uint8_t gpio_read(Pin pin)
 {
-    if (!pin) return 0x00;
     PinData *data = (PinData*)pin;
     return reg_read_bit(data->input_reg, data->bit);
 }
