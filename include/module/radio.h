@@ -11,9 +11,9 @@ typedef enum {
 } RadioConfigCrc;
 
 typedef enum {
-    RADIO_CONFIG_ADDRESS_WIDTH_3,
-    RADIO_CONFIG_ADDRESS_WIDTH_4,
-    RADIO_CONFIG_ADDRESS_WIDTH_5
+    RADIO_CONFIG_ADDRESS_WIDTH_3 = 0b01,
+    RADIO_CONFIG_ADDRESS_WIDTH_4 = 0b10,
+    RADIO_CONFIG_ADDRESS_WIDTH_5 = 0b11
 } RadioConfigAddressWidth;
 
 typedef enum {
@@ -46,8 +46,18 @@ typedef struct {
     uint8_t frequency_channel;
     RadioConfigAirDataRate air_data_rate;
     RadioConfigOutputPower output_power;
-    RadioPipeConfig rx_config[6];
+
+    // Only RX pipes 1-5 used for rx
+    uint32_t rx_base_address;
+    uint8_t rx_pipe_addresses[5];
+    uint8_t rx_pipe_enable[5];
+    uint8_t rx_payload_sizes[5];
+
+    // Pipe RX 0 and TX have the same address
     uint64_t tx_address;
+    // RX 0 is also automatically given a suitable
+    // payload size
+
     Pin CE;
     Pin CSN;
     Pin IRQ;

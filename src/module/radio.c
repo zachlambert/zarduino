@@ -26,6 +26,30 @@ void radio_register_write(RadioConfig *config, uint8_t address, uint8_t value)
     spi_transfer_bytes(config->CSN, data_in, 0, 2);
 }
 
+void radio_register_read_bytes(RadioConfig *config, uint8_t address, uint8_t *data_out, size_t num_bytes)
+{
+    uint8_t spi_data_in[num_bytes+1];
+    spi_data_in[0] = command_R_REGISTER(address);
+    for (size_t i = 0; i < num_bytes; i++) {
+        spi_data_in[i+1] = command_NOP;
+    }
+    uint8_t spi_data_out[num_bytes+1];
+    spi_transfer_bytes(config->CSN, spi_data_in, spi_data_out, num_bytes+1);
+    for (size_t i = 0; i < num_bytes; i++) {
+        data_out[i] = spi_data_out[i+1];
+    }
+}
+
+void radio_register_write_bytes(RadioConfig *config, uint8_t address, uint8_t *data_in, size_t num_bytes)
+{
+    uint8_t spi_data_in[num_bytes+1];
+    spi_data_in[0] = command_W_REGISTER(address);
+    for (size_t i = 0; i < num_bytes; i++) {
+        spi_data_in[i+1] = data_in[i];
+    }
+    spi_transfer_bytes(config->CSN, spi_data_in, 0, num_bytes+1);
+}
+
 RadioConfig radio_create_config(void)
 {
     RadioConfig config = {};
@@ -46,20 +70,17 @@ RadioConfig radio_create_config(void)
     config.air_data_rate = RADIO_CONFIG_AIR_DATA_RATE_2MBPS;
     config.output_power = RADIO_CONFIG_OUTPUT_POWER_0DB;
 
-    config.rx_config[0].address = 0xE7E7E7E7E7;
-    config.rx_config[0].payload_size = 1;
-    config.rx_config[0].en = 1;
-
-    config.rx_config[1].address = 0xC2C2C2C2C2;
-    config.rx_config[1].payload_size = 1;
-    config.rx_config[1].en = 1;
-
-    config.rx_config[2].address = 0xC3;
-    config.rx_config[3].address = 0xC4;
-    config.rx_config[4].address = 0xC5;
-    config.rx_config[5].address = 0xC6;
-
     config.tx_address = 0xE7E7E7E7E7;
+
+    config.rx_base_address = 0xC2C2C2C2;
+    config.rx_pipe_addresses[0] = 0xC2;
+    config.rx_pipe_addresses[1] = 0xC3;
+    config.rx_pipe_addresses[2] = 0xC4;
+    config.rx_pipe_addresses[3] = 0xC5;
+    config.rx_pipe_addresses[4] = 0xC6;
+    config.rx_pipe_enable[0] = 1;
+
+    config.rx_payload_sizes[0] = 1;
 
     return config;
 }
@@ -100,10 +121,12 @@ void radio_init(RadioConfig *config)
     radio_register_write(config, register_CONFIG, config_reg);
     
     // 0x02 EN_RXADDR
-    uint8_t en_rxaddr_reg = 0;
-    for (size_t i = 0; i < 6; i++) {
-        en_rxaddr_reg |= config->rx_config[i].en << i;
+    uint8_t en_rxaddr_reg = 1; // Always enable RX pipe 0
+    // Enable the dedicated RX pipes
+    for (size_t i = 0; i < 5; i++) {
+        en_rxaddr_reg |= config->rx_pipe_enable[i] << (i+1);
     }
+    printf("Enabled rx pipes: %x\n", en_rxaddr_reg);
     radio_register_write(config, register_EN_RXADDR, en_rxaddr_reg);
 
     // 0x03 SETUP_AW
@@ -129,18 +152,88 @@ void radio_init(RadioConfig *config)
     uint8_t rf_setup_reg = 0;
     rf_setup_reg |= config->air_data_rate << RF_DR;
 
-    // 0x0A -> 0x0F RX_ADDR_P0 -> RX_ADDR_P5
-    // TODO Need multiple byte write
-    
-    // 0x10 TX_ADDR
-    // TODO Need multiple byte write
+    // Addresses
+    // - All RX pipes, and TX have 3-5 byte addresses,
+    //   depending on the value of address_width
+    // - Only RX pipes 0 and 1, and TX have these written
+    //   to their registers, which are 5 bytes wide.
+    // - RX pipes 2 - 5 have 1 byte registers, which set
+    //   the LSB of their address, and share the MSBs with
+    //   pipe 1.
+    // - Hence, the upper bytes of pipe 1 address are a base
+    //   address for pipes 1-5.
+    //
+    // - When in TX mode, RX pipe 0 is used to receive the
+    //   acknowledgement packets. Therefore, it needs to have
+    //   the same address.
+    // - To simplify things, RX is always paired with TX and
+    //   given the same address, even if TX is not used.
 
-    // 0x11 -> 0x16 RX_PW_P0 -> RX_RW_P5
-    for (size_t i = 0; i < 6; i++) {
+
+    // === TX ADDRESS ===
+
+    uint8_t tx_addr_data[2+config->address_width];
+    for (size_t i = 0; i < 2+config->address_width; i++) {
+        tx_addr_data[i] = config->tx_address >> 8*i;
+    }
+
+    radio_register_write_bytes(
+        config,
+        register_RX_ADDR_P0,
+        tx_addr_data, // RX 0 and TX have same address
+        2+config->address_width
+    );
+
+    radio_register_write_bytes(
+        config,
+        register_TX_ADDR,
+        tx_addr_data,
+        2+config->address_width
+    );
+
+    for (size_t i = 0; i < 5; i++) printf("%x ", tx_addr_data[i]);
+    printf("\n");
+
+    // === RX ADDRESSES ===
+
+    uint8_t rx1_addr_data[2+config->address_width];
+    rx1_addr_data[0] = config->rx_pipe_addresses[0];
+    for (size_t i = 0; i < 1+config->address_width; i++) {
+        rx1_addr_data[i+1] = config->rx_base_address >> 8*i;
+    }
+
+    for (size_t i = 0; i < 5; i++) printf("%x ", rx1_addr_data[i]);
+    printf("\n");
+
+    radio_register_write_bytes(
+        config,
+        register_RX_ADDR_P1,
+        rx1_addr_data,
+        2+config->address_width
+    );
+
+    // for (size_t i = 1; i < 5; i++) {
+    //     radio_register_write(
+    //         config,
+    //         register_RX_ADDR_P2 + i,
+    //         config->rx_pipe_addresses[i]
+    //     );
+    // }
+
+    // 0x11 RX_PW_P0
+    radio_register_write(
+        config,
+        register_RX_PW_P0,
+        1 // Assume a 1 byte payload is fine for RX 0
+          // which is receives the TX acknowledgment packet
+    );
+
+    // 0x12 -> 0x16 RX_PW_P1 -> RX_RW_P5
+    for (size_t i = 0; i < 5; i++) {
         radio_register_write(
             config,
-            register_RX_PW_P0 + i,
-            (config->rx_config[i].payload_size & RX_PW_P0_mask) << RX_PW_P0_shift
+            register_RX_PW_P1 + i,
+            1//(config->rx_payload_sizes[i] & RX_PW_P0_mask) << RX_PW_P0_shift
         );
     }
 
@@ -159,29 +252,6 @@ void radio_init(RadioConfig *config)
 
 void radio_set_mode_rx(RadioConfig *config)
 {
-    // 1. Set the pipe address
-    // Leave default
-
-    // 2. Set the payload size
-    uint8_t num_bytes = 1;
-    radio_register_write(
-        config,
-        register_RX_PW_P0,
-        (num_bytes & RX_PW_P0_mask) << RX_PW_P0_shift
-    );
-
-    // 3. Enable the pipe (already done by default for 0, 1)
-    // uint8_t reg_en_rxaddr = radio_register_read(
-    //     config, register_EN_RXADDR
-    // );
-    // reg_en_rxaddr |= 1 << ERX_P0;
-    // radio_register_write(
-    //     config,
-    //     register_EN_RXADDR,
-    //     reg_en_rxaddr
-    // );
-
-    // 4. Set PRIM_RX to go into RX mode
     uint8_t reg_config =
         radio_register_read(config, register_CONFIG);
     reg_config |= 1 << PRIM_RX;
@@ -191,21 +261,6 @@ void radio_set_mode_rx(RadioConfig *config)
 
 void radio_set_mode_tx(RadioConfig *config)
 {
-    // 1. Set address
-    // Leave address default -> RX pipe 0 default address
-
-    // 2. Also need to use the rx pipe 0, so set the
-    // address
-    // Again, leave default
-
-    // 3. Set payload size for pipe 0
-    uint8_t num_bytes = 1;
-    radio_register_write(
-        config,
-        register_RX_PW_P0,
-        (num_bytes & RX_PW_P0_mask) << RX_PW_P0_shift
-    );
-
     // 4. Set PRIM_RX low
     uint8_t reg_config =
         radio_register_read(config, register_CONFIG);
