@@ -18,7 +18,6 @@ int main(void)
     radio_config.CE = PIN_D8;
     radio_config.IRQ = 0;
 
-    // radio_config.tx_address = 0xA000000012;
     radio_config.rx_base_address = 0xA0000000;
     radio_config.rx_pipe_addresses[0] = 0x12;
 

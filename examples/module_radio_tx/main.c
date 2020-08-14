@@ -19,8 +19,6 @@ int main(void)
     radio_config.IRQ = 0;
 
     radio_config.tx_address = 0xA000000012;
-    // radio_config.rx_base_address = 0xA0000000;
-    // radio_config.rx_pipe_addresses[0] = 0x13;
 
     radio_init_as_transmitter(&radio_config);
 

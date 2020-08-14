@@ -97,7 +97,7 @@ void radio_init_common(RadioConfig *config)
 
     // 0x02 EN_RXADDR
     uint8_t EN_RXADDR = 0;
-    reg_write_bit(&EN_RXADDR, 0, 1);
+    reg_write_bit(&EN_RXADDR, 0, 1); // Always enable pipe 0
     for (size_t i = 0; i < 5; i++) {
         reg_write_bit(&EN_RXADDR, i+1, config->rx_pipe_enable[i]);
     }
@@ -112,7 +112,6 @@ void radio_init_common(RadioConfig *config)
     uint8_t SETUP_RETR = 0;
     reg_write_mask(&SETUP_RETR, ARD_shift, ARD_mask, config->auto_retransmit_delay);
     reg_write_mask(&SETUP_RETR, ARC_shift, ARC_mask, config->auto_retransmit_count);
-
     radio_register_write(config, SETUP_RETR_address, &SETUP_RETR, 1);
 
     // 0x05 RF_CH
@@ -172,7 +171,7 @@ void radio_init_common(RadioConfig *config)
     for (size_t i = 1; i < 5; i++) {
         radio_register_write(
             config,
-            RX_ADDR_P2_address + i,
+            RX_ADDR_P1_address + i,
             &config->rx_pipe_addresses[i],
             1
         );
@@ -180,19 +179,16 @@ void radio_init_common(RadioConfig *config)
 
     // === RX PIPE PAYLOAD SIZES ===
 
-    uint8_t RX_PW_Pn[6];
     // Assume payload size 1 for RX pipe 0
-    reg_write_mask(RX_PW_Pn, RX_PW_Pn_shift, RX_PW_Pn_mask, 1);
+    uint8_t rx0_payload_size = 1;
+    radio_register_write(config, RX_PW_P0_address, &rx0_payload_size, 1);
     for (size_t i = 1; i < 6; i++) {
-        reg_write_mask(
-            RX_PW_Pn+i,
-            RX_PW_Pn_shift,
-            RX_PW_Pn_mask,
-            config->rx_payload_sizes[i-1]
+        radio_register_write(
+            config,
+            RX_PW_P0_address+i,
+            &config->rx_payload_sizes[i-1],
+            1
         );
-    }
-    for (size_t i = 0; i<6; i++) {
-        radio_register_write(config, RX_PW_P0_address+i, &RX_PW_Pn[i], 1);
     }
 
     // === RESET STATUS AND FLUSH BUFFERS ===
@@ -230,7 +226,6 @@ void radio_init_as_transmitter(RadioConfig *config)
 
 void radio_start(RadioConfig *config)
 {
-    // 2. Set CE high
     gpio_write(config->CE, 1);
 }
 
