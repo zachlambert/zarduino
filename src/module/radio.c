@@ -6,27 +6,7 @@
 #include "module/radio_constants.h"
 
 
-uint8_t radio_register_read(RadioConfig *config, uint8_t address)
-{
-    uint8_t data_in[] = {
-        command_R_REGISTER(address),
-        command_NOP
-    };
-    uint8_t data_out[2];
-    spi_transfer_bytes(config->CSN, data_in, data_out, 2);
-    return data_out[1];
-}
-
-void radio_register_write(RadioConfig *config, uint8_t address, uint8_t value)
-{
-    uint8_t data_in[] = {
-        command_W_REGISTER(address),
-        value
-    };
-    spi_transfer_bytes(config->CSN, data_in, 0, 2);
-}
-
-void radio_register_read_bytes(RadioConfig *config, uint8_t address, uint8_t *data_out, size_t num_bytes)
+void radio_register_read(RadioConfig *config, uint8_t address, uint8_t *data_out, size_t num_bytes)
 {
     uint8_t spi_data_in[num_bytes+1];
     spi_data_in[0] = command_R_REGISTER(address);
@@ -40,7 +20,7 @@ void radio_register_read_bytes(RadioConfig *config, uint8_t address, uint8_t *da
     }
 }
 
-void radio_register_write_bytes(RadioConfig *config, uint8_t address, uint8_t *data_in, size_t num_bytes)
+void radio_register_write(RadioConfig *config, uint8_t address, uint8_t *data_in, size_t num_bytes)
 {
     uint8_t spi_data_in[num_bytes+1];
     spi_data_in[0] = command_W_REGISTER(address);
@@ -53,10 +33,6 @@ void radio_register_write_bytes(RadioConfig *config, uint8_t address, uint8_t *d
 RadioConfig radio_create_config(void)
 {
     RadioConfig config = {};
-
-    // Use the same default values as those used by
-    // the device, except for payload size of the default
-    // enabled RX pipes
 
     config.interrupt_en_rx = 1;
     config.interrupt_en_tx_ack = 1;
@@ -87,70 +63,64 @@ RadioConfig radio_create_config(void)
 
 void radio_reset_status(RadioConfig *config)
 {
-    radio_register_write(
-        config,
-        register_STATUS,
-        1<<RX_DR | 1<<TX_DS | 1<<MAX_RT
-    );
+    uint8_t status_value = 1<<RX_DR | 1<<TX_DS | 1<<MAX_RT;
+    radio_register_write(config, register_STATUS, &status_value, 1);
 }
 
-void radio_init(RadioConfig *config)
+void radio_init_common(RadioConfig *config)
 {
-    // GPIO
+    // === GPIO ===
+
     gpio_mode_output(config->CE);
     gpio_mode_output(config->CSN);
     if (config->IRQ)
         gpio_mode_input(config->IRQ);
     gpio_write(config->CSN, 1);
-
-    // SPI
-    // Used over many modules, so the main program should
-    // handle SPI initialisation when its needed.
-
-    // Ensure the radio is in standby/power down mode
-    // by ensuring CE is low. Should be 0 anyway.
     gpio_write(config->CE, 0);
+    // Ensure CE is low, so its in power down / standby mode
 
-    // 0x00 CONFIG
-    uint8_t config_reg = 0;
-    config_reg |= config->interrupt_en_rx << MASK_RX_DR;
-    config_reg |= config->interrupt_en_tx_ack << MASK_TX_DS;
-    config_reg |= config->interrupt_en_max_retransmit << MASK_MAX_RT;
-    config_reg |= config->en_crc << EN_CRC;
-    config_reg |= config->crc << CRCO;
-    radio_register_write(config, register_CONFIG, config_reg);
-    
+    // === SPI ====
+    // Initialised by main program
+
+    // === CONFIG register ===
+
+    uint8_t CONFIG = 0;
+    reg_write_bit(&CONFIG, MASK_RX_DR, config->interrupt_en_rx);
+    reg_write_bit(&CONFIG, MASK_TX_DS, config->interrupt_en_tx_ack);
+    reg_write_bit(&CONFIG, MASK_MAX_RT, config->interrupt_en_max_retransmit);
+    reg_write_bit(&CONFIG, EN_CRC, config->en_crc);
+    reg_write_bit(&CONFIG, CRCO, config->crc);
+    radio_register_write(config, CONFIG_address, &CONFIG, 1);
+
     // 0x02 EN_RXADDR
-    uint8_t en_rxaddr_reg = 1; // Always enable RX pipe 0
-    // Enable the dedicated RX pipes
+    uint8_t EN_RXADDR = 0;
+    reg_write_bit(&EN_RXADDR, 0, 1);
     for (size_t i = 0; i < 5; i++) {
-        en_rxaddr_reg |= config->rx_pipe_enable[i] << (i+1);
+        reg_write_bit(&EN_RXADDR, i+1, config->rx_pipe_enable[i]);
     }
-    printf("Enabled rx pipes: %x\n", en_rxaddr_reg);
-    radio_register_write(config, register_EN_RXADDR, en_rxaddr_reg);
+    radio_register_write(config, EN_RXADDR_address, &EN_RXADDR, 1);
 
     // 0x03 SETUP_AW
-    uint8_t setup_aw_reg = (config->address_width & AW_mask) << AW_shift;
-    radio_register_write(
-        config,
-        register_SETUP_AW,
-        setup_aw_reg
-    );
+    uint8_t SETUP_AW = 0;
+    reg_write_mask(&SETUP_AW, AW_shift, AW_mask, config->address_width);
+    radio_register_write(config, SETUP_AW_address, &SETUP_AW, 1);
 
     // 0x04 SETUP_RETR
-    uint8_t setup_retr_reg = 0;
-    setup_retr_reg |= (config->auto_retransmit_delay & ARD_mask) << ARD_shift;
-    setup_retr_reg |= (config->auto_retransmit_count & ARC_mask) << ARC_shift;
+    uint8_t SETUP_RETR = 0;
+    reg_write_mask(&SETUP_RETR, ARD_shift, ARD_mask, config->auto_retransmit_delay);
+    reg_write_mask(&SETUP_RETR, ARC_shift, ARC_mask, config->auto_retransmit_count);
 
-    radio_register_write(config, register_SETUP_RETR, setup_retr_reg);
+    radio_register_write(config, SETUP_RETR_address, &SETUP_RETR, 1);
 
     // 0x05 RF_CH
-    uint8_t rf_ch_reg = (config->frequency_channel & RF_CH_mask) << RF_CH_shift;
-    radio_register_write(config, register_RF_CH, rf_ch_reg);
+    uint8_t RF_CH = 0;
+    reg_write_mask(&RF_CH, RF_CH_shift, RF_CH_mask, config->frequency_channel);
+    radio_register_write(config, RF_CH_address, &RF_CH, 1);
 
     // 0x06 RF_SETUP
-    uint8_t rf_setup_reg = 0;
-    rf_setup_reg |= config->air_data_rate << RF_DR;
+    uint8_t RF_SETUP = 0;
+    reg_write_bit(&RF_SETUP, RF_DR, config->air_data_rate);
+    radio_register_write(config, RF_SETUP_address, &RF_SETUP, 1);
 
     // Addresses
     // - All RX pipes, and TX have 3-5 byte addresses,
@@ -172,100 +142,86 @@ void radio_init(RadioConfig *config)
 
     // === TX ADDRESS ===
 
-    uint8_t tx_addr_data[2+config->address_width];
-    for (size_t i = 0; i < 2+config->address_width; i++) {
-        tx_addr_data[i] = config->tx_address >> 8*i;
+    uint8_t TX_ADDR[5];
+    for (size_t i = 0; i < 5; i++) {
+        if (i < 2 + config->address_width)
+            TX_ADDR[i] = config->tx_address >> 8*i;
+        else
+            TX_ADDR[i] = 0;
     }
-
-    radio_register_write_bytes(
-        config,
-        register_RX_ADDR_P0,
-        tx_addr_data, // RX 0 and TX have same address
-        2+config->address_width
-    );
-
-    radio_register_write_bytes(
-        config,
-        register_TX_ADDR,
-        tx_addr_data,
-        2+config->address_width
-    );
-
-    for (size_t i = 0; i < 5; i++) printf("%x ", tx_addr_data[i]);
-    printf("\n");
+    radio_register_write(config, TX_ADDR_address, TX_ADDR, 5);
+    radio_register_write(config, RX_ADDR_P0_address, TX_ADDR, 5);
 
     // === RX ADDRESSES ===
 
-    uint8_t rx1_addr_data[2+config->address_width];
-    rx1_addr_data[0] = config->rx_pipe_addresses[0];
-    for (size_t i = 0; i < 1+config->address_width; i++) {
-        rx1_addr_data[i+1] = config->rx_base_address >> 8*i;
+    uint8_t RX_ADDR_P1[5];
+    RX_ADDR_P1[0] = config->rx_pipe_addresses[0];
+    for (size_t i = 1; i < 5; i++) {
+        if (i < 2 + config->address_width)
+            RX_ADDR_P1[i] = config->rx_base_address >> 8*(i-1);
+        else
+            RX_ADDR_P1[i] = 0;
     }
+    radio_register_write(config, RX_ADDR_P1_address, RX_ADDR_P1, 5);
 
-    for (size_t i = 0; i < 5; i++) printf("%x ", rx1_addr_data[i]);
-    printf("\n");
-
-    radio_register_write_bytes(
-        config,
-        register_RX_ADDR_P1,
-        rx1_addr_data,
-        2+config->address_width
-    );
-
-    // for (size_t i = 1; i < 5; i++) {
-    //     radio_register_write(
-    //         config,
-    //         register_RX_ADDR_P2 + i,
-    //         config->rx_pipe_addresses[i]
-    //     );
-    // }
-
-    // 0x11 RX_PW_P0
-    radio_register_write(
-        config,
-        register_RX_PW_P0,
-        1 // Assume a 1 byte payload is fine for RX 0
-          // which is receives the TX acknowledgment packet
-    );
-
-    // 0x12 -> 0x16 RX_PW_P1 -> RX_RW_P5
-    for (size_t i = 0; i < 5; i++) {
+    // Register addresses are consecutive, so use a loop instead of writing
+    // each out manually
+    for (size_t i = 1; i < 5; i++) {
         radio_register_write(
             config,
-            register_RX_PW_P1 + i,
-            1//(config->rx_payload_sizes[i] & RX_PW_P0_mask) << RX_PW_P0_shift
+            RX_ADDR_P2_address + i,
+            &config->rx_pipe_addresses[i],
+            1
         );
     }
 
-    // Reset the status register
-    radio_reset_status(config);
+    // === RX PIPE PAYLOAD SIZES ===
 
-    // Flush buffers
+    uint8_t RX_PW_Pn[6];
+    // Assume payload size 1 for RX pipe 0
+    reg_write_mask(RX_PW_Pn, RX_PW_Pn_shift, RX_PW_Pn_mask, 1);
+    for (size_t i = 1; i < 6; i++) {
+        reg_write_mask(
+            RX_PW_Pn+i,
+            RX_PW_Pn_shift,
+            RX_PW_Pn_mask,
+            config->rx_payload_sizes[i-1]
+        );
+    }
+    for (size_t i = 0; i<6; i++) {
+        radio_register_write(config, RX_PW_P0_address+i, &RX_PW_Pn[i], 1)
+    }
+
+    // === RESET STATUS AND FLUSH BUFFERS ===
+
+    radio_reset_status(config);
     spi_transfer_byte(config->CSN, command_FLUSH_RX);
     spi_transfer_byte(config->CSN, command_FLUSH_TX);
 
     // Power up
-    uint8_t reg_config = radio_register_read(config, register_CONFIG);
-    reg_config |= 1<<PWR_UP;
-    radio_register_write(config, register_CONFIG, reg_config);
+    reg_write_bit(&CONFIG, PWR_UP, 1);
+    radio_register_write(config, CONFIG_address, &CONFIG, 1);
 }
 
-void radio_set_mode_rx(RadioConfig *config)
+void radio_init_as_receiver(RadioConfig *config)
 {
-    uint8_t reg_config =
-        radio_register_read(config, register_CONFIG);
-    reg_config |= 1 << PRIM_RX;
-    radio_register_write(config, register_CONFIG, reg_config);
+    radio_init_common(config);
+
+    uint8_t CONFIG;
+    radio_register_read(config, CONFIG_address, &CONFIG, 1);
+    reg_write_bit(&CONFIG, PRIM_RX, 1);
+    radio_register_write(config, CONFIG_address, &CONFIG, 1);
 
 }
 
-void radio_set_mode_tx(RadioConfig *config)
+void radio_init_as_transmitter(RadioConfig *config)
 {
-    // 4. Set PRIM_RX low
-    uint8_t reg_config =
-        radio_register_read(config, register_CONFIG);
-    reg_config &= ~(1 << PRIM_RX);
-    radio_register_write(config, register_CONFIG, reg_config);
+    radio_init_common(config);
+
+    uint8_t CONFIG;
+    radio_register_read(config, CONFIG_address, &CONFIG, 1);
+    reg_write_bit(&CONFIG, PRIM_RX, 0);
+    radio_register_write(config, CONFIG_address, &CONFIG, 1);
 }
 
 void radio_start(RadioConfig *config)

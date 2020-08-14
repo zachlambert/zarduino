@@ -65,20 +65,8 @@ typedef struct {
 
 RadioConfig radio_create_config(void);
 
-void radio_init(RadioConfig *config);
-void radio_set_mode_rx(RadioConfig *config);
-void radio_set_mode_tx(RadioConfig *config);
-
-uint8_t radio_register_read(
-    RadioConfig *config,
-    uint8_t register_address
-);
-
-void radio_register_write(
-    RadioConfig *config,
-    uint8_t register_address,
-    uint8_t value
-);
+void radio_init_as_receiver(RadioConfig *config);
+void radio_init_as_transmitter(RadioConfig *config);
 
 uint8_t radio_read_rx(RadioConfig *config);
 void radio_write_tx(RadioConfig *config, uint8_t value);
