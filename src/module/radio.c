@@ -63,8 +63,11 @@ RadioConfig radio_create_config(void)
 
 void radio_reset_status(RadioConfig *config)
 {
-    uint8_t status_value = 1<<RX_DR | 1<<TX_DS | 1<<MAX_RT;
-    radio_register_write(config, register_STATUS, &status_value, 1);
+    uint8_t STATUS;
+    reg_write_bit(&STATUS, RX_DR, 1);
+    reg_write_bit(&STATUS, TX_DS, 1);
+    reg_write_bit(&STATUS, MAX_RT, 1);
+    radio_register_write(config, STATUS_address, &STATUS, 1);
 }
 
 void radio_init_common(RadioConfig *config)
@@ -189,7 +192,7 @@ void radio_init_common(RadioConfig *config)
         );
     }
     for (size_t i = 0; i<6; i++) {
-        radio_register_write(config, RX_PW_P0_address+i, &RX_PW_Pn[i], 1)
+        radio_register_write(config, RX_PW_P0_address+i, &RX_PW_Pn[i], 1);
     }
 
     // === RESET STATUS AND FLUSH BUFFERS ===

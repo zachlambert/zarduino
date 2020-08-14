@@ -14,13 +14,13 @@ uint8_t reg_read_bit(volatile uint8_t *reg, uint8_t bit)
     return (*reg >> bit) & 0x01;
 }
 
-void reg_write_mask(volatile uint8_t *reg, uint8_t mask, uint8_t value)
+void reg_write_mask(volatile uint8_t *reg, uint8_t shift, uint8_t mask, uint8_t value)
 {
-    *reg &= ~mask;
-    *reg |= value & mask;
+    *reg &= ~(mask << shift);
+    *reg |= (value & mask) << shift;
 }
 
-uint8_t reg_read_mask(volatile uint8_t *reg, uint8_t mask)
+uint8_t reg_read_mask(volatile uint8_t *reg, uint8_t shift, uint8_t mask)
 {
-    return *reg & mask;
+    return (*reg & mask << shift) >> shift;
 }

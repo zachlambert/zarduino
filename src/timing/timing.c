@@ -137,12 +137,12 @@ void timer0_init_as_pwm(void)
 {
     // Clear OC0A and 0C0B on compare match
     reg_write_mask( // Control register A, channel A
-        &TCCR0A, 0b11000000,
-        OUTPUT_COMPARE_MODE_CLEAR << 6
+        &TCCR0A, 6, 0b11,
+        OUTPUT_COMPARE_MODE_CLEAR
     );
     reg_write_mask( // Control register A, channel B
-        &TCCR0A, 0b00110000,
-        OUTPUT_COMPARE_MODE_CLEAR << 4
+        &TCCR0A, 4, 0b11,
+        OUTPUT_COMPARE_MODE_CLEAR
     );
 
     // Use waveform generation PWM fast, which with the
@@ -156,7 +156,7 @@ void timer0_init_as_pwm(void)
 
     // Set clock source to CLK
     uint8_t clock = TIMER0_CLOCK_CLK;
-    reg_write_mask(&TCCR0B, 0b00000111, clock);
+    reg_write_mask(&TCCR0B, 0, 0b111, clock);
 }
 
 void timer0_set_duty_cycle_a(float duty_cycle)
@@ -198,8 +198,8 @@ ISR(TIMER0_COMPA_vect)
 void timer0_init_as_timer_ms(float ms, void (*callback)(void))
 {
     // Don't use output compare on either channel
-    reg_write_mask(&TCCR0A, 0b11000000, 0);
-    reg_write_mask(&TCCR0A, 0b00110000, 0);
+    reg_write_mask(&TCCR0A, 6, 0b11, 0);
+    reg_write_mask(&TCCR0A, 4, 0b11, 0);
 
     // Normal timer/counter waveform
     reg_write_bit(&TCCR0B, WGM02, 0);
@@ -207,7 +207,7 @@ void timer0_init_as_timer_ms(float ms, void (*callback)(void))
     reg_write_bit(&TCCR0A, WGM00, 0);
 
     uint8_t clock = TIMER0_CLOCK_CLK_DIV_1024;
-    reg_write_mask(&TCCR0B, 0b00000111, clock);
+    reg_write_mask(&TCCR0B, 3, 0b111, clock);
 
     uint64_t clock_cycles = (ms * F_CPU)/(1000.0f*1024);
     counter_timer0 = 0;
@@ -226,15 +226,15 @@ void timer0_init_as_timer_ms(float ms, void (*callback)(void))
 
 void timer0_init_as_timer_accurate(void)
 {
-    reg_write_mask(&TCCR0A, 0b11000000, 0);
-    reg_write_mask(&TCCR0A, 0b00110000, 0);
+    reg_write_mask(&TCCR0A, 6, 0b11, 0);
+    reg_write_mask(&TCCR0A, 4, 0b11, 0);
 
     reg_write_bit(&TCCR0B, WGM02, 0);
     reg_write_bit(&TCCR0A, WGM01, 0);
     reg_write_bit(&TCCR0A, WGM00, 0);
 
     uint8_t clock = TIMER0_CLOCK_CLK;
-    reg_write_mask(&TCCR0B, 0b00000111, clock);
+    reg_write_mask(&TCCR0B, 0, 0b111, clock);
 
     // Enable interrupts
     sei();
@@ -264,14 +264,9 @@ void timer0_accurate_reset(void)
 
 void timer1_init_as_pwm(void)
 {
-    reg_write_mask(
-        &TCCR1A, 0b11000000,
-        OUTPUT_COMPARE_MODE_CLEAR << 6
-    );
-    reg_write_mask(
-        &TCCR1A, 0b00110000,
-        OUTPUT_COMPARE_MODE_CLEAR << 4
-    );
+    reg_write_mask(&TCCR1A, 6, 0b11,OUTPUT_COMPARE_MODE_CLEAR);
+    reg_write_mask(&TCCR1A, 4, 0b11, OUTPUT_COMPARE_MODE_CLEAR);
+
     uint8_t waveform = TIMER1_WAVEFORM_PWM_FAST_10;
     reg_write_bit(&TCCR1B, WGM13, (waveform & 0b1000) >> 3);
     reg_write_bit(&TCCR1B, WGM12, (waveform & 0b0100) >> 2);
@@ -279,7 +274,7 @@ void timer1_init_as_pwm(void)
     reg_write_bit(&TCCR1A, WGM10, (waveform & 0b0001) >> 0);
 
     uint8_t clock = TIMER1_CLOCK_CLK;
-    reg_write_mask(&TCCR1B, 0b00000111, clock);
+    reg_write_mask(&TCCR1B, 0, 0b111, clock);
 }
 
 void timer1_set_duty_cycle_a(float duty_cycle)
@@ -326,8 +321,8 @@ void timer1_init_as_timer_ms(float ms, void (*callback)(void))
 {
     // Don't need either output compare signal, but
     // will use the interrupt on compare match A
-    reg_write_mask(&TCCR1A, 0b11000000, 0);
-    reg_write_mask(&TCCR1A, 0b00110000, 0);
+    reg_write_mask(&TCCR1A, 6, 0b11, 0);
+    reg_write_mask(&TCCR1A, 4, 0b11, 0);
 
     // Can still use the normal waveform
     uint8_t waveform = TIMER1_WAVEFORM_NORMAL;
@@ -337,7 +332,7 @@ void timer1_init_as_timer_ms(float ms, void (*callback)(void))
     reg_write_bit(&TCCR1A, WGM10, (waveform & 0b0001) >> 0);
 
     uint8_t clock = TIMER1_CLOCK_CLK_DIV_1024;
-    reg_write_mask(&TCCR1B, 0b00000111, clock);
+    reg_write_mask(&TCCR1B, 0, 0b111, clock);
 
     uint64_t clock_cycles = (ms * F_CPU)/(1000.0f*1024);
     counter_timer1 = 0;
@@ -366,8 +361,8 @@ ISR(TIMER1_CAPT_vect)
 
 void timer1_init_as_pulse_capture_us(void)
 {
-    reg_write_mask(&TCCR1A, 0b11000000, 0);
-    reg_write_mask(&TCCR1A, 0b00110000, 0);
+    reg_write_mask(&TCCR1A, 6, 0b11, 0);
+    reg_write_mask(&TCCR1A, 4, 0b11, 0);
 
     //62.5ns resolution
 
@@ -394,7 +389,7 @@ void timer1_init_as_pulse_capture_us(void)
     // -> Resolution of 0.5us
     // Can measure up to 0.5us * 2^16 = 32.768 ms
     uint8_t clock = TIMER1_CLOCK_CLK_DIV_8;
-    reg_write_mask(&TCCR1B, 0b00000111, clock);
+    reg_write_mask(&TCCR1B, 0, 0b111, clock);
 }
 
 uint16_t timer1_get_pulse_length_us(void)
@@ -407,21 +402,16 @@ uint16_t timer1_get_pulse_length_us(void)
 
 void timer2_init_as_pwm(void)
 {
-    reg_write_mask(
-        &TCCR2A, 0b11000000,
-        OUTPUT_COMPARE_MODE_CLEAR << 6
-    );
-    reg_write_mask(
-        &TCCR2A, 0b00110000,
-        OUTPUT_COMPARE_MODE_CLEAR << 4
-    );
+    reg_write_mask(&TCCR2A, 6, 0b11, OUTPUT_COMPARE_MODE_CLEAR);
+    reg_write_mask(&TCCR2A, 4, 0b11, OUTPUT_COMPARE_MODE_CLEAR);
+
     uint8_t waveform = TIMER0_WAVEFORM_PWM_FAST;
     reg_write_bit(&TCCR2B, WGM22, (waveform & 0b100) >> 2);
     reg_write_bit(&TCCR2A, WGM21, (waveform & 0b010) >> 1);
     reg_write_bit(&TCCR2A, WGM20, (waveform & 0b001) >> 0);
 
     uint8_t clock = TIMER2_CLOCK_CLK;
-    reg_write_mask(&TCCR2B, 0b00000111, clock);
+    reg_write_mask(&TCCR2B, 0, 0b111, clock);
 }
 
 void timer2_set_duty_cycle_a(float duty_cycle)
@@ -462,8 +452,8 @@ ISR(TIMER2_COMPA_vect)
 void timer2_init_as_timer_ms(float ms, void (*callback)(void))
 {
     // Don't use output compare on either channel
-    reg_write_mask(&TCCR2A, 0b11000000, 0);
-    reg_write_mask(&TCCR2A, 0b00110000, 0);
+    reg_write_mask(&TCCR2A, 6, 0b11, 0);
+    reg_write_mask(&TCCR2A, 4, 0b11, 0);
 
     // Normal timer/counter waveform
     reg_write_bit(&TCCR2B, WGM22, 0);
@@ -471,7 +461,7 @@ void timer2_init_as_timer_ms(float ms, void (*callback)(void))
     reg_write_bit(&TCCR2A, WGM20, 0);
 
     uint8_t clock = TIMER2_CLOCK_CLK_DIV_1024;
-    reg_write_mask(&TCCR2B, 0b00000111, clock);
+    reg_write_mask(&TCCR2B, 0, 0b111, clock);
 
     uint64_t clock_cycles = (ms * F_CPU)/(1000.0f*1024);
     counter_timer2 = 0;

@@ -15,10 +15,10 @@ ADCConfig adc_create_config(void)
 
 void adc_initialise(ADCConfig *config)
 {
-    reg_write_mask(&ADMUX, 0b11000000, config->reference<<6);
+    reg_write_mask(&ADMUX, 6, 0b11, config->reference);
     reg_write_bit(&ADCSRA, ADEN, 1); 
-    reg_write_mask(&ADCSRA, 0b00000111, config->prescaler_select);
-    reg_write_bit(&ADMUX, 0b00000111, config->analog_pin);
+    reg_write_mask(&ADCSRA, 0, 0b111, config->prescaler_select);
+    reg_write_mask(&ADMUX, 0, 0b111, config->analog_pin);
     // Disable the digital input too
     DIDR0 = 0;
     reg_write_bit(&DIDR0, config->analog_pin, 1);
