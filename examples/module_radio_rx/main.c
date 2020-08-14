@@ -22,8 +22,7 @@ int main(void)
     radio_config.rx_base_address = 0xA0000000;
     radio_config.rx_pipe_addresses[0] = 0x12;
 
-    radio_init(&radio_config);
-    radio_set_mode_rx(&radio_config);
+    radio_init_as_receiver(&radio_config);
 
     delay(10);
     radio_start(&radio_config);

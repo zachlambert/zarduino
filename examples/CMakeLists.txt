@@ -3,6 +3,9 @@ function(add_example name)
         ${name}/main.c
     )
     target_link_libraries(${name}.elf zarduino)
+    target_include_directories(${name}.elf
+        PRIVATE /usr/lib/avr/include
+    )
 endfunction()
 
 add_example(gpio_write)
