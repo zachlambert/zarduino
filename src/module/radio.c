@@ -201,7 +201,8 @@ void radio_init_common(RadioConfig *config)
     spi_transfer_byte(config->CSN, command_FLUSH_RX);
     spi_transfer_byte(config->CSN, command_FLUSH_TX);
 
-    // Power up
+    // === Power up ===
+
     reg_write_bit(&CONFIG, PWR_UP, 1);
     radio_register_write(config, CONFIG_address, &CONFIG, 1);
 }
