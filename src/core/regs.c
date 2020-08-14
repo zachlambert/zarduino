@@ -22,5 +22,5 @@ void reg_write_mask(volatile uint8_t *reg, uint8_t shift, uint8_t mask, uint8_t 
 
 uint8_t reg_read_mask(volatile uint8_t *reg, uint8_t shift, uint8_t mask)
 {
-    return (*reg & mask << shift) >> shift;
+    return (*reg & (mask << shift)) >> shift;
 }

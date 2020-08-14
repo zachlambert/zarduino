@@ -69,7 +69,19 @@ RadioConfig radio_create_config(void);
 void radio_init_as_receiver(RadioConfig *config);
 void radio_init_as_transmitter(RadioConfig *config);
 
-void radio_read_rx(RadioConfig *config, uint8_t *data_out, size_t num_bytes);
+typedef enum {
+    RADIO_RX_STATUS_PIPE0,
+    RADIO_RX_STATUS_PIPE1,
+    RADIO_RX_STATUS_PIPE2,
+    RADIO_RX_STATUS_PIPE3,
+    RADIO_RX_STATUS_PIPE4,
+    RADIO_RX_STATUS_PIPE5,
+    RADIO_RX_STATUS_NOT_USED,
+    RADIO_RX_STATUS_EMPTY
+} RadioRxStatus;
+
+RadioRxStatus radio_read_rx(RadioConfig *config, uint8_t *data_out, size_t num_bytes);
+
 void radio_write_tx(RadioConfig *config, uint8_t *data_in, size_t num_bytes);
 
 void radio_start(RadioConfig *config);

@@ -234,7 +234,7 @@ void radio_stop(RadioConfig *config)
     gpio_write(config->CE, 0);
 }
 
-void radio_read_rx(RadioConfig *config, uint8_t *data_out, size_t num_bytes)
+RadioRxStatus radio_read_rx(RadioConfig *config, uint8_t *data_out, size_t num_bytes)
 {
     uint8_t spi_data_in[1+num_bytes];
     spi_data_in[0] = command_R_RX_PAYLOAD;
@@ -242,20 +242,23 @@ void radio_read_rx(RadioConfig *config, uint8_t *data_out, size_t num_bytes)
         spi_data_in[i+1] = command_NOP;
     }
     uint8_t spi_data_out[1+num_bytes];
-    spi_transfer_bytes(config->CSN, spi_data_in, spi_data_out, 2);
+    spi_transfer_bytes(config->CSN, spi_data_in, spi_data_out, 1+num_bytes);
     for (size_t i = 0; i < num_bytes; i++) {
         data_out[i] = spi_data_out[i+1];
     }
+    spi_transfer_byte(config->CSN, command_FLUSH_RX);
+    return reg_read_mask(
+        &spi_data_out[0], RX_P_NO_shift, RX_P_NO_mask
+    );
 }
 
 void radio_write_tx(RadioConfig *config, uint8_t *data_in, size_t num_bytes)
 {
-    // Flush the TX buffer
-    spi_transfer_byte(config->CSN, command_FLUSH_TX);
+    // spi_transfer_byte(config->CSN, command_FLUSH_TX);
     uint8_t spi_data_in[1+num_bytes];
     spi_data_in[0] = command_W_TX_PAYLOAD;
     for (size_t i = 0; i < num_bytes; i++) {
         spi_data_in[i+1] = data_in[i];
     }
-    spi_transfer_bytes(config->CSN, data_in, 0, 2);
+    spi_transfer_bytes(config->CSN, spi_data_in, 0, 1+num_bytes);
 }
