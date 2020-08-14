@@ -4,6 +4,7 @@
 // nRF24L01 module
 
 #include "core/pins.h"
+#include <stdlib.h>
 
 typedef enum {
     RADIO_CONFIG_CRC_1BYTE,
@@ -68,8 +69,8 @@ RadioConfig radio_create_config(void);
 void radio_init_as_receiver(RadioConfig *config);
 void radio_init_as_transmitter(RadioConfig *config);
 
-uint8_t radio_read_rx(RadioConfig *config);
-void radio_write_tx(RadioConfig *config, uint8_t value);
+void radio_read_rx(RadioConfig *config, uint8_t *data_out, size_t num_bytes);
+void radio_write_tx(RadioConfig *config, uint8_t *data_in, size_t num_bytes);
 
 void radio_start(RadioConfig *config);
 void radio_stop(RadioConfig *config);
