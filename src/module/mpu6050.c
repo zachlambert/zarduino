@@ -1,7 +1,7 @@
 #include "module/mpu6050.h"
 #include "comms/i2c.h"
 #include "core/regs.h"
-#include "timing/timing.h"
+#include "comms/uart.h"
 
 const uint8_t SMPRT_DIV_address = 0x19;
 const uint8_t CONFIG_address = 0x1A;
@@ -18,6 +18,8 @@ MPU6050Config mpu6050_create_config(void)
 {
     MPU6050Config config = {};
     config.i2c_address = 0x68;
+    config.low_pass_filter = MPU6050_LOW_PASS_FILTER_LEVEL6;
+    config.clock_source = MPU6050_CLOCK_SOURCE_GYRO_Z;
     return config;
 }
 
@@ -116,11 +118,11 @@ void mpu6050_read_data(MPU6050Config *config, MPU6050Data *data)
         6
     );
 
-    data->accel_x = (float)(ACCEL[0]<<8 | ACCEL[1]) * config->accel_sensitivity;
-    data->accel_y = (float)(ACCEL[2]<<8 | ACCEL[3]) * config->accel_sensitivity;
-    data->accel_z = (float)(ACCEL[4]<<8 | ACCEL[5]) * config->accel_sensitivity;
+    data->accel_x = (float)(int)(ACCEL[0]<<8 | ACCEL[1]) * config->accel_sensitivity;
+    data->accel_y = (float)(int)(ACCEL[2]<<8 | ACCEL[3]) * config->accel_sensitivity;
+    data->accel_z = (float)(int)(ACCEL[4]<<8 | ACCEL[5]) * config->accel_sensitivity;
 
-    data->gyro_x = (float)(GYRO[0]<<8 | ACCEL[1]) * config->gyro_sensitivity;
-    data->gyro_y = (float)(GYRO[2]<<8 | ACCEL[3]) * config->gyro_sensitivity;
-    data->gyro_z = (float)(GYRO[4]<<8 | ACCEL[5]) * config->gyro_sensitivity;
+    data->gyro_x = (float)(GYRO[0]<<8 | GYRO[1]) * config->gyro_sensitivity;
+    data->gyro_y = (float)(GYRO[2]<<8 | GYRO[3]) * config->gyro_sensitivity;
+    data->gyro_z = (float)(GYRO[4]<<8 | GYRO[5]) * config->gyro_sensitivity;
 }

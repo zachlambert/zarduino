@@ -26,3 +26,4 @@ add_example(i2c)
 
 add_example(module_radio_rx)
 add_example(module_radio_tx)
+add_example(module_mpu6050)

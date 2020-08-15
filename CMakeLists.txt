@@ -19,6 +19,7 @@ add_library(zarduino
     src/core/pin_data.c
     src/core/regs.c
     src/module/radio.c
+    src/module/mpu6050.c
     src/timing/timing.c
 )
 target_include_directories(zarduino
