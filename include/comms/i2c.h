@@ -19,7 +19,18 @@ typedef struct {
 I2CConfig i2c_create_config(void);
 void i2c_init_master(I2CConfig *config);
 
-void i2c_read(uint8_t i2c_address, uint8_t *data_out, size_t num_bytes);
-void i2c_write(uint8_t i2c_address, uint8_t *data_in, size_t num_bytes);
+void i2c_read_register(
+    uint8_t i2c_address,
+    uint8_t reg_address,
+    uint8_t *data_out,
+    size_t num_bytes
+);
+
+void i2c_write_register(
+    uint8_t i2c_address,
+    uint8_t reg_address,
+    uint8_t *data_in,
+    size_t num_bytes
+);
 
 #endif
