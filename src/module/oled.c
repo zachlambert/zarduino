@@ -1,4 +1,5 @@
 #include "module/oled.h"
+#include "module/oled_font.h"
 #include "comms/i2c.h"
 
 #include <string.h>

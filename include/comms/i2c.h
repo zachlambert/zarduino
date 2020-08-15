@@ -33,4 +33,7 @@ void i2c_write_register(
     size_t num_bytes
 );
 
+void i2c_write(uint8_t i2c_address, uint8_t *data_in, size_t num_bytes);
+
+
 #endif

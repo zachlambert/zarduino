@@ -105,3 +105,13 @@ void i2c_write_register(
     i2c_send_stop();
 }
 
+
+void i2c_write(uint8_t i2c_address, uint8_t *data_in, size_t num_bytes)
+{
+    i2c_send_start();
+    i2c_send_slave_address(i2c_address, 0);
+    for (size_t i = 0; i < num_bytes; i++) {
+        i2c_send_data(data_in[i]);
+    }
+    i2c_send_stop();
+}
