@@ -2,15 +2,24 @@
 #define ZARDUINO_COMMS_I2C_H
 
 #include <stdint.h>
+#include <stdlib.h>
+
+typedef enum {
+    I2C_BIT_RATE_PRESCALER_1,
+    I2C_BIT_RATE_PRESCALER_4,
+    I2C_BIT_RATE_PRESCALER_16,
+    I2C_BIT_RATE_PRESCALER_64,
+} I2CBitRatePrescaler;
 
 typedef struct {
-
+    uint8_t bit_rate_reduction;
+    I2CBitRatePrescaler bit_rate_prescaler;
 } I2CConfig;
 
 I2CConfig i2c_create_config(void);
 void i2c_init_master(I2CConfig *config);
 
-uint8_t i2c_read(uint8_t i2c_address);
-void i2c_write(uint8_t i2c_address, uint8_t value);
+void i2c_read(uint8_t i2c_address, uint8_t *data_out, size_t num_bytes);
+void i2c_write(uint8_t i2c_address, uint8_t *data_in, size_t num_bytes);
 
 #endif
