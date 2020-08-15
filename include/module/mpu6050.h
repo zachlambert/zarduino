@@ -56,19 +56,24 @@ typedef struct {
     uint8_t i2c_address;
     float accel_sensitivity;
     float gyro_sensitivity;
+    float accel_zero_readings[3];
+    float gyro_zero_readings[3];
 } MPU6050Config;
 
 typedef struct {
-    float gyro_x;
-    float gyro_y;
-    float gyro_z;
-    float accel_x;
-    float accel_y;
-    float accel_z;
+    float accel[3];
+    float gyro[3];
+    float tilt;
+    float roll;
+    // Can't get pan from acceleration measurements
+    // Roll is inaccurate when g is close to the roll axis (gimbal lock)
 } MPU6050Data;
 
 MPU6050Config mpu6050_create_config(void);
 void mpu6050_init(MPU6050Config *config);
 void mpu6050_read_data(MPU6050Config *config, MPU6050Data *data);
+// Calibrating assumes the device is still, with the Z axis vertical
+void mpu6050_calibrate(MPU6050Config *config);
+void mpu6050_calculate_euler(MPU6050Data *data);
 
 #endif

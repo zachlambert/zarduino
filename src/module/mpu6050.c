@@ -3,6 +3,8 @@
 #include "core/regs.h"
 #include "comms/uart.h"
 
+#include <math.h>
+
 const uint8_t SMPRT_DIV_address = 0x19;
 const uint8_t CONFIG_address = 0x1A;
 const uint8_t PWR_MGMT_1_address = 0x6B;
@@ -88,41 +90,59 @@ void mpu6050_init(MPU6050Config *config)
     float accel_range;
     switch (config->gyro_range) {
         case MPU6050_ACCEL_RANGE_PM_2_G:
-            accel_range = 2*9.81;
+            accel_range = 2;//*9.81;
         case MPU6050_ACCEL_RANGE_PM_4_G:
-            accel_range = 4*9.81;
+            accel_range = 4;//*9.81;
         case MPU6050_ACCEL_RANGE_PM_8_G:
-            accel_range = 8*9.81;
+            accel_range = 8;//*9.81;
         case MPU6050_ACCEL_RANGE_PM_16_G:
-            accel_range = 16*9.81;
+            accel_range = 16;//*9.81;
     }
     // 16-bit signed integer, range = +-32768
     config->accel_sensitivity = accel_range/32768.0;
+
+    mpu6050_calibrate(config);
+}
+
+void mpu6050_read_accel(MPU6050Config *config, float accel[3])
+{
+    uint8_t ACCEL[6];
+    i2c_read_register(config->i2c_address, ACCEL_start_address, ACCEL, 6);
+
+    for (size_t i = 0; i < 3; i++)
+        accel[i] = (float)(ACCEL[2*i]<<8 | ACCEL[2*i+1]) * config->accel_sensitivity;
+}
+
+void mpu6050_read_gyro(MPU6050Config *config, float gyro[3])
+{
+    uint8_t GYRO[6];
+    i2c_read_register(config->i2c_address, GYRO_start_address, GYRO, 6);
+
+    for (size_t i = 0; i < 3; i++)
+        gyro[i] = (float)(GYRO[2*i]<<8 | GYRO[2*i+1]) * config->gyro_sensitivity;
 }
 
 void mpu6050_read_data(MPU6050Config *config, MPU6050Data *data)
 {
-    uint8_t ACCEL[6];
-    i2c_read_register(
-        config->i2c_address,
-        ACCEL_start_address,
-        ACCEL,
-        6
-    );
+    mpu6050_read_accel(config, data->accel);
+    for (size_t i = 0; i < 2; i++)
+        data->accel[i] -= config->accel_zero_readings[i];
 
-    uint8_t GYRO[6];
-    i2c_read_register(
-        config->i2c_address,
-        GYRO_start_address,
-        GYRO,
-        6
-    );
+    mpu6050_read_gyro(config, data->gyro);
+    for (size_t i = 0; i < 3; i++)
+        data->gyro[i] -= config->gyro_zero_readings[i];
+}
 
-    data->accel_x = (float)(int)(ACCEL[0]<<8 | ACCEL[1]) * config->accel_sensitivity;
-    data->accel_y = (float)(int)(ACCEL[2]<<8 | ACCEL[3]) * config->accel_sensitivity;
-    data->accel_z = (float)(int)(ACCEL[4]<<8 | ACCEL[5]) * config->accel_sensitivity;
+void mpu6050_calibrate(MPU6050Config *config)
+{
+    mpu6050_read_accel(config, config->accel_zero_readings);
+    config->accel_zero_readings[2] -= 9.81; // Should be 9.81
+    mpu6050_read_gyro(config, config->gyro_zero_readings);
+}
 
-    data->gyro_x = (float)(GYRO[0]<<8 | GYRO[1]) * config->gyro_sensitivity;
-    data->gyro_y = (float)(GYRO[2]<<8 | GYRO[3]) * config->gyro_sensitivity;
-    data->gyro_z = (float)(GYRO[4]<<8 | GYRO[5]) * config->gyro_sensitivity;
+void mpu6050_calculate_euler(MPU6050Data* data)
+{
+    float axy = hypot(data->accel[0], data->accel[1]);
+    data->tilt = atan2(axy, data->accel[2]);
+    data->roll = atan2(data->accel[1], data->accel[0]);
 }

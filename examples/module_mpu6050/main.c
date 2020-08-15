@@ -14,18 +14,15 @@ int main(void)
 
     while (1) {
         mpu6050_read_data(&config, &data);
-        printf(
-            "Acc: %d %d %d ",
-            (int)data.accel_x,
-            (int)data.accel_y,
-            (int)data.accel_z
-        );
-        printf(
-            "Gyro: %d %d %d\n",
-            (int)data.gyro_x,
-            (int)data.gyro_y,
-            (int)data.gyro_z
-        );
+        mpu6050_calculate_euler(&data);
+        printf("Acc: ");
+        for(size_t i = 0; i < 3; i++)
+            printf("%d ", (int)data.accel[i]);
+        printf(" | Gyro: ");
+        for(size_t i = 0; i < 3; i++)
+            printf("%d ", (int)data.gyro[i]);
+        printf(" | Tilt: %d | Roll: %d", (int)(data.tilt*57.3), (int)(data.roll*57.3));
+        printf("\n");
         delay(50);
     }
 }
