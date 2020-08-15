@@ -2,10 +2,14 @@
 #include "comms/uart.h"
 #include "module/mpu6050.h"
 #include "timing/delay.h"
+#include "comms/i2c.h"
 
 int main(void)
 {
     uart_init();
+
+    I2CConfig i2c_config = i2c_create_config();
+    i2c_init_master(&i2c_config);
 
     MPU6050Config config = mpu6050_create_config();
     mpu6050_init(&config);
