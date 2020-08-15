@@ -11,14 +11,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 include(tools/target_cmake_scripts/arduino_uno.cmake)
 
 add_library(zarduino
+    src/comms/uart.c
+    src/comms/spi.c
+    src/comms/i2c.c
     src/core/adc.c
+    src/core/interrupt.c
     src/core/pin_data.c
     src/core/regs.c
-    src/comms/uart.c
-    src/core/interrupt.c
-    src/timing/timing.c
-    src/comms/spi.c
     src/module/radio.c
+    src/timing/timing.c
 )
 target_include_directories(zarduino
     PUBLIC include

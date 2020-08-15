@@ -49,7 +49,6 @@ void uart_putchar(char c, FILE *stream)
     }
     while (!reg_read_bit(&UCSR0A, UDRE0));
     UDR0 = c;
-    return 0;
 }
 
 char uart_getchar(FILE *stream)

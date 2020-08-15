@@ -44,6 +44,8 @@ extern const Pin PIN_RESET;
 #define PIN_MOSI PIN_D11
 #define PIN_MISO PIN_D12
 #define PIN_SCK PIN_D13
+#define PIN_SCL PIN_A5
+#define PIN_SDA PIN_A4
 #define PIN_RX PIN_D0
 #define PIN_TX PIN_D2
 
