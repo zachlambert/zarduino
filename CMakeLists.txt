@@ -10,7 +10,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 include(tools/target_cmake_scripts/arduino_uno.cmake)
 
-add_library(zarduino
+add_library(zarduino STATIC
+    include/core/pins.h
     src/comms/uart.c
     src/comms/spi.c
     src/comms/i2c.c
@@ -27,7 +28,18 @@ target_include_directories(zarduino
     PUBLIC include
     PRIVATE src /usr/lib/avr/include
 )
+
 # avr-gcc knows where the avr header files are, but putting
 # it here allows the intellisense to know they exist
 
 add_subdirectory(examples)
+
+set_target_properties(zarduino PROPERTIES PUBLIC_HEADER
+    "include/core/pins.h;include/timing/timing.h"
+)
+
+install(TARGETS zarduino
+    ARCHIVE DESTINATION lib
+    PUBLIC_HEADER DESTINATION include/zarduino
+    INCLUDES DESTINATION include
+)
