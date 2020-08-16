@@ -75,9 +75,28 @@ void oled_putc(OLEDConfig *config, OLEDData *data, char c)
     // memset(data->buffer, 0x55, data->buffer_size);
 }
 
+void oled_print_string(OLEDConfig *config, OLEDData *data, char *string)
+{
+    while (*string != 0) {
+        if (*string == '\n') {
+            data->col = 0;
+            data->row++;
+            if (data->row >= 8)
+                data->row = 0;
+        } else if (*string == '\r') {
+            data->col = 0;
+        } else {
+            oled_putc(config, data, *string);
+        }
+        string++;
+    }
+}
+
 void oled_clear(OLEDData* data)
 {
     memset(data->buffer, 0, data->buffer_size);
+    data->col = 0;
+    data->row = 0;
 }
 
 void oled_update(OLEDConfig *config, OLEDData *data)

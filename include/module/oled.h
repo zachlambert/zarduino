@@ -24,6 +24,7 @@ OLEDData oled_create_data(OLEDConfig *config);
 
 void oled_init(OLEDConfig *config);
 void oled_putc(OLEDConfig *config, OLEDData *data, char c);
+void oled_print_string(OLEDConfig *config, OLEDData *data, char *string);
 void oled_clear(OLEDData *data);
 void oled_update(OLEDConfig *config, OLEDData *data);
 
