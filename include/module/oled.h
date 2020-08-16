@@ -2,19 +2,18 @@
 #define ZARDUINO_MODULE_OLED
 
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef struct {
     uint8_t i2c_address;
+    size_t width;
+    size_t height;
 } OLEDConfig;
-
-typedef struct {
-    uint8_t buffer[128*64/8];
-} OLEDData;
 
 OLEDConfig oled_create_config(void);
 void oled_init(OLEDConfig *config);
-void oled_putc(OLEDData *data, char c);
-void oled_clear(OLEDData *data);
-void oled_update(OLEDConfig *config, OLEDData *data);
+void oled_putc(OLEDConfig *config, char c);
+void oled_clear(void);
+void oled_update(OLEDConfig *config);
 
 #endif

@@ -18,8 +18,9 @@ add_library(zarduino
     src/core/interrupt.c
     src/core/pin_data.c
     src/core/regs.c
-    src/module/radio.c
     src/module/mpu6050.c
+    src/module/oled.c
+    src/module/radio.c
     src/timing/timing.c
 )
 target_include_directories(zarduino

@@ -24,6 +24,7 @@ add_example(spi_read_byte)
 add_example(spi_read_bytes)
 add_example(i2c)
 
+add_example(module_mpu6050)
+add_example(module_oled)
 add_example(module_radio_rx)
 add_example(module_radio_tx)
-add_example(module_mpu6050)

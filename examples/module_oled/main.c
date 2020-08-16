@@ -1,5 +1,7 @@
 #include "module/oled.h"
 #include "comms/i2c.h"
+#include <string.h>
+#include "timing/delay.h"
 
 int main(void)
 {
@@ -9,7 +11,11 @@ int main(void)
     OLEDConfig oled_config = oled_create_config();
     oled_init(&oled_config);
 
-    OLEDData oled_data = {};
-    oled_putc(&oled_data, '!');
-    oled_update(&oled_config, &oled_data);
+    oled_clear();
+    oled_putc(&oled_config, '!');
+
+    while (1) {
+        oled_update(&oled_config);
+        delay(50);
+    }
 }

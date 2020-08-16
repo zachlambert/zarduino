@@ -1,19 +1,27 @@
 #include "module/oled.h"
-#include "module/oled_font.h"
+// #include "module/oled_font.h"
 #include "comms/i2c.h"
+#include "comms/uart.h"
 
 #include <string.h>
+
+size_t oled_col;
+size_t oled_row;
+uint8_t oled_buffer[1024+1];
 
 OLEDConfig oled_create_config()
 {
     OLEDConfig config = {};
-    config.i2c_address = 0x1E;
+    config.i2c_address = 0x3C;
+    config.width = 128;
+    config.height = 64;
     return config;
 }
 
 void oled_init(OLEDConfig *config)
 {
-    static const uint8_t setup_commands[] = {
+    static uint8_t setup_commands[] = {
+        0x00,
         0xAE, // Turn off
         0xD5, 0x80, // Setup clock
         0xA8, 63, // Set panel height
@@ -36,26 +44,42 @@ void oled_init(OLEDConfig *config)
     i2c_write(config->i2c_address, setup_commands, sizeof(setup_commands));
 }
 
-void oled_putc(OLEDData *data, char c)
+void oled_putc(OLEDConfig *config, char c)
 {
-    uint8_t bitmap = oled_get_bitmap(c);
+    // const uint8_t *const bitmap = 0;//oled_get_bitmap(c);
+    // // TODO: Change alignment of oled, so bytes are horizontal,
+    // // like with the font
+    // for (size_t i = 0; i < 8; i++) {
+    //     oled_buffer[i] = bitmap[i];
+    //     // TODO: Use row and column
+    // }
+    // oled_col++;
+    // if (oled_col == config->width/8) {
+    //     oled_col = 0;
+    //     oled_row = 0;
+    //     if (oled_row == config->height/8)
+    //         oled_row = 0;
+    // }
+    memset(oled_buffer, 0x55, sizeof(oled_buffer));
 }
 
-void oled_clear(OLEDData *data)
+void oled_clear(void)
 {
-    memset(data->buffer, 0, sizeof(data->buffer));
+    memset(oled_buffer, 0, sizeof(oled_buffer));
 }
 
-void oled_update(OLEDConfig *config, OLEDData *data)
+void oled_update(OLEDConfig *config)
 {
-    static const uint8_t write_setup_commands[] = {
+    static uint8_t i2c_data[] = {
+        0x00,
         0x22, 0x00, 0xFF, // Set page address to start at 0x00, end at 0xFF
         // (end address above doesn't seem to do anything)
         0x21, 0x00, 127, // Set column address to start at 0, end at max (width-1)
     };
-    i2c_write(config->i2c_address, write_setup_commands, sizeof(write_setup_commands));
-    uint8_t next_command;
-    i2c_write(config->i2c_address, &next_command, 1);
-    i2c_write(config->i2c_address, &next_command, 1);
-    i2c_write(config->i2c_address, data->buffer, sizeof(data->buffer));
+    i2c_write(config->i2c_address, i2c_data, sizeof(i2c_data));
+    // uint8_t next_command = 0x40;
+    // i2c_write(config->i2c_address, &next_command, 1);
+    oled_buffer[0] = 0x40;
+    i2c_write(config->i2c_address, oled_buffer, sizeof(oled_buffer));
+
 }

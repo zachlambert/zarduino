@@ -1,6 +1,7 @@
 #include "comms/i2c.h"
 #include "core/regs.h"
-#include <avr/interrupt.h>
+#include "core/pins.h"
+#include <avr/io.h>
 
 // Status codes for master mode
 // These cover the whole TWSR register, but with the
@@ -18,11 +19,13 @@ const uint8_t STATUS_SLA_R_NACK = 0x48;
 const uint8_t STATUS_DATA_R_ACK = 0x50;
 const uint8_t STATUS_DATA_R_NACK = 0x58;
 
+#define I2C_FREQ 100000L
 I2CConfig i2c_create_config(void)
 {
     I2CConfig config = {};
-    config.bit_rate_reduction = 0;
+    // Default: Get a 100kHZ I2C clock
     config.bit_rate_prescaler = I2C_BIT_RATE_PRESCALER_1;
+    config.bit_rate_reduction = ((F_CPU / I2C_FREQ) - 16) / 2;
     return config;
 }
 
@@ -30,6 +33,11 @@ void i2c_init_master(I2CConfig *config)
 {
     TWBR = config->bit_rate_reduction;
     reg_write_mask(&TWSR, TWPS0, 0b11, config->bit_rate_prescaler);
+    // Enable pullps on SDA and SCL
+    gpio_mode_input_pullup(PIN_SDA);
+    gpio_mode_input_pullup(PIN_SCL);
+
+    reg_write_bit(&TWCR, TWEN, 1);
 }
 
 void i2c_send_start(void)
