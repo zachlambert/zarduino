@@ -13,8 +13,8 @@ int main(void)
 
     OLEDData oled_data = oled_create_data(&oled_config);
 
-    for (size_t i = 0; i < 20; i++)
-        oled_putc(&oled_config, &oled_data, '#');
+    for (unsigned char c = 32; c <= 126; c++)
+        oled_putc(&oled_config, &oled_data, c);
 
     while (1) {
         oled_update(&oled_config, &oled_data);

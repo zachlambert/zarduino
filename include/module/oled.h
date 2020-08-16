@@ -21,6 +21,7 @@ typedef struct {
 
 OLEDConfig oled_create_config(void);
 OLEDData oled_create_data(OLEDConfig *config);
+
 void oled_init(OLEDConfig *config);
 void oled_putc(OLEDConfig *config, OLEDData *data, char c);
 void oled_clear(OLEDData *data);
