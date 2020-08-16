@@ -883,9 +883,9 @@ const uint8_t OLED_BITMAP[(126-32)*8][8] PROGMEM = {
     }
 };
 
-void oled_get_bitmap(unsigned char c, uint8_t out[16]){
+void oled_get_bitmap(unsigned char c, uint8_t out[8]){
     if (c < 32 || c > 126) c = 32;
-    for (size_t i = 0; i < 16; i++) {
+    for (size_t i = 0; i < 8; i++) {
         out[i] = pgm_read_byte(&(OLED_BITMAP[c-32][i]));
     }
 };

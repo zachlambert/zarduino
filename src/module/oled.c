@@ -58,21 +58,22 @@ void oled_init(OLEDConfig *config)
 
 void oled_putc(OLEDConfig *config, OLEDData *data, char c)
 {
-    static uint8_t bitmap[16];
+    static uint8_t bitmap[8];
     oled_get_bitmap(c, bitmap);
-    // TODO: Change alignment of oled, so bytes are horizontal,
-    // like with the font
     for (size_t i = 0; i < 8; i++) {
-        data->buffer[data->row*128 + data->col*8 + i] = bitmap[i];
+        data->buffer[
+            data->row*config->width
+            + data->col*config->height/8
+            + i]
+        = bitmap[i];
     }
     data->col++;
-    if (data->col >= 16) {
+    if (data->col >= config->width/8) {
         data->col = 0;
         data->row++;
-        if (data->row >= 8)
+        if (data->row >= config->height/8)
             data->row = 0;
     }
-    // memset(data->buffer, 0x55, data->buffer_size);
 }
 
 void oled_print_string(OLEDConfig *config, OLEDData *data, char *string)
@@ -81,7 +82,7 @@ void oled_print_string(OLEDConfig *config, OLEDData *data, char *string)
         if (*string == '\n') {
             data->col = 0;
             data->row++;
-            if (data->row >= 8)
+            if (data->row >= config->width/8)
                 data->row = 0;
         } else if (*string == '\r') {
             data->col = 0;
@@ -108,8 +109,7 @@ void oled_update(OLEDConfig *config, OLEDData *data)
         0x21, 0x00, 127, // Set column address to start at 0, end at max (width-1)
     };
     i2c_write(config->i2c_address, i2c_data, sizeof(i2c_data));
-    // uint8_t next_command = 0x40;
-    // i2c_write(config->i2c_address, &next_command, 1);
+
     i2c_write(config->i2c_address, data->i2c_data, data->i2c_data_size);
 
 }

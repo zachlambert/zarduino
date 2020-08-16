@@ -13,9 +13,9 @@ int main(void)
 
     OLEDData oled_data = oled_create_data(&oled_config);
 
-    oled_print_string(&oled_config, &oled_data, "asdf\n");
     for (unsigned char c = 32; c <= 126; c++)
         oled_putc(&oled_config, &oled_data, c);
+    oled_update(&oled_config, &oled_data);
 
     delay(1000);
 
