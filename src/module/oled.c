@@ -5,17 +5,26 @@
 
 #include <string.h>
 
-size_t oled_col;
-size_t oled_row;
-uint8_t oled_buffer[1024+1];
-
 OLEDConfig oled_create_config()
 {
-    OLEDConfig config = {};
+    OLEDConfig config;
     config.i2c_address = 0x3C;
     config.width = 128;
     config.height = 64;
     return config;
+}
+
+OLEDData oled_create_data(OLEDConfig *config)
+{
+    OLEDData data;
+    data.buffer_size = config->width * config->height / 8;
+    data.i2c_data_size = data.buffer_size + 1;
+    data.i2c_data = malloc(data.i2c_data_size);
+    // Malloc may fail if not enough ram, in which case you need
+    // to free some space somewhere in the program
+    data.i2c_data[0] = 0x40;
+    data.buffer = data.i2c_data + 1;
+    return data;
 }
 
 void oled_init(OLEDConfig *config)
@@ -44,7 +53,7 @@ void oled_init(OLEDConfig *config)
     i2c_write(config->i2c_address, setup_commands, sizeof(setup_commands));
 }
 
-void oled_putc(OLEDConfig *config, char c)
+void oled_putc(OLEDConfig *config, OLEDData *data, char c)
 {
     // const uint8_t *const bitmap = 0;//oled_get_bitmap(c);
     // // TODO: Change alignment of oled, so bytes are horizontal,
@@ -60,15 +69,15 @@ void oled_putc(OLEDConfig *config, char c)
     //     if (oled_row == config->height/8)
     //         oled_row = 0;
     // }
-    memset(oled_buffer, 0x55, sizeof(oled_buffer));
+    memset(data->buffer, 0x55, data->buffer_size);
 }
 
-void oled_clear(void)
+void oled_clear(OLEDData* data)
 {
-    memset(oled_buffer, 0, sizeof(oled_buffer));
+    memset(data->buffer, 0, data->buffer_size);
 }
 
-void oled_update(OLEDConfig *config)
+void oled_update(OLEDConfig *config, OLEDData *data)
 {
     static uint8_t i2c_data[] = {
         0x00,
@@ -79,7 +88,6 @@ void oled_update(OLEDConfig *config)
     i2c_write(config->i2c_address, i2c_data, sizeof(i2c_data));
     // uint8_t next_command = 0x40;
     // i2c_write(config->i2c_address, &next_command, 1);
-    oled_buffer[0] = 0x40;
-    i2c_write(config->i2c_address, oled_buffer, sizeof(oled_buffer));
+    i2c_write(config->i2c_address, data->i2c_data, data->i2c_data_size);
 
 }

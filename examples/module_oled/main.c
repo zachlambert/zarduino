@@ -11,11 +11,12 @@ int main(void)
     OLEDConfig oled_config = oled_create_config();
     oled_init(&oled_config);
 
-    oled_clear();
-    oled_putc(&oled_config, '!');
+    OLEDData oled_data = oled_create_data(&oled_config);
+
+    oled_putc(&oled_config, &oled_data, '!');
 
     while (1) {
-        oled_update(&oled_config);
+        oled_update(&oled_config, &oled_data);
         delay(50);
     }
 }
