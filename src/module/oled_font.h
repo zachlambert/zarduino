@@ -2,9 +2,11 @@
 #define ZARDUINO_MODULE_OLED_FONT
 
 #include <stdint.h>
+#include <string.h>
+#include <avr/pgmspace.h>
 
 
-const uint8_t OLED_BITMAP[(126-32)][8] = {
+const uint8_t OLED_BITMAP[(126-32)*8][8] PROGMEM = {
     { //SPACE
         0b00000000,
         0b00000000,
@@ -33,12 +35,12 @@ const uint8_t OLED_BITMAP[(126-32)][8] = {
         0b00000000,
         0b00000000
     }, { // #
-        0b00100100,
-        0b00100100,
-        0b01111110,
-        0b00100100,
-        0b11111100,
+        0b00000000,
         0b01001000,
+        0b01001000,
+        0b11111110,
+        0b01001000,
+        0b11111110,
         0b01001000,
         0b01001000
     }, { // $
@@ -233,9 +235,10 @@ const uint8_t OLED_BITMAP[(126-32)][8] = {
     }
 };
 
-const uint8_t *const oled_get_bitmap(unsigned char c){
-    if (c<32 || c>126) return OLED_BITMAP[0];
-    return OLED_BITMAP[c-32];
+void oled_get_bitmap(unsigned char c, uint8_t out[16]){
+    for (size_t i = 0; i < 16; i++) {
+        out[i] = pgm_read_byte(&(OLED_BITMAP[c-32][i]));
+    }
 };
 
 #endif

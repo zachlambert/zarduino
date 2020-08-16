@@ -1,5 +1,5 @@
 #include "module/oled.h"
-// #include "module/oled_font.h"
+#include "module/oled_font.h"
 #include "comms/i2c.h"
 #include "comms/uart.h"
 
@@ -24,6 +24,9 @@ OLEDData oled_create_data(OLEDConfig *config)
     // to free some space somewhere in the program
     data.i2c_data[0] = 0x40;
     data.buffer = data.i2c_data + 1;
+    oled_clear(&data);
+    data.col = 0;
+    data.row = 0;
     return data;
 }
 
@@ -55,21 +58,21 @@ void oled_init(OLEDConfig *config)
 
 void oled_putc(OLEDConfig *config, OLEDData *data, char c)
 {
-    // const uint8_t *const bitmap = 0;//oled_get_bitmap(c);
-    // // TODO: Change alignment of oled, so bytes are horizontal,
-    // // like with the font
-    // for (size_t i = 0; i < 8; i++) {
-    //     oled_buffer[i] = bitmap[i];
-    //     // TODO: Use row and column
-    // }
-    // oled_col++;
-    // if (oled_col == config->width/8) {
-    //     oled_col = 0;
-    //     oled_row = 0;
-    //     if (oled_row == config->height/8)
-    //         oled_row = 0;
-    // }
-    memset(data->buffer, 0x55, data->buffer_size);
+    static uint8_t bitmap[16];
+    oled_get_bitmap(c, bitmap);
+    // TODO: Change alignment of oled, so bytes are horizontal,
+    // like with the font
+    for (size_t i = 0; i < 8; i++) {
+        data->buffer[data->row*128 + data->col*8 + i] = bitmap[i];
+    }
+    data->col++;
+    if (data->col >= 16) {
+        data->col = 0;
+        data->row++;
+        if (data->row >= 8)
+            data->row = 0;
+    }
+    // memset(data->buffer, 0x55, data->buffer_size);
 }
 
 void oled_clear(OLEDData* data)
