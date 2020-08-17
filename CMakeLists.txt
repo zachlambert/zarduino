@@ -28,18 +28,12 @@ target_include_directories(zarduino
     PUBLIC include
     PRIVATE src /usr/lib/avr/include
 )
-
 # avr-gcc knows where the avr header files are, but putting
 # it here allows the intellisense to know they exist
 
 add_subdirectory(examples)
 
-set_target_properties(zarduino PROPERTIES PUBLIC_HEADER
-    "include/core/pins.h;include/timing/timing.h"
-)
-
 install(TARGETS zarduino
     ARCHIVE DESTINATION lib
-    # PUBLIC_HEADER DESTINATION include/zarduino
 )
 install(DIRECTORY include/ DESTINATION include/zarduino PATTERN include/)

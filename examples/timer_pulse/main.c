@@ -22,8 +22,8 @@ int main(void)
     uart_init();
     printf("Starting\n");
 
-    trigger = PIN_D3;
-    echo = PIN_D2;
+    trigger = PIN_ARDUINO_D3;
+    echo = PIN_ARDUINO_D2;
     gpio_mode_output(trigger);
 
     // Using HC-SR04 ultrasound distance sensor

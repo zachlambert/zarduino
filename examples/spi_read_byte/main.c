@@ -10,7 +10,7 @@ int main(void)
     SPIConfig config = spi_create_config();
     spi_init_master(&config);
 
-    Pin CS = PIN_D6;
+    Pin CS = PIN_ARDUINO_D6;
     gpio_mode_output(CS);
     gpio_write(CS, 1);
 

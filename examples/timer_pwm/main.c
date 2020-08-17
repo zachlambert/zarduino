@@ -5,12 +5,12 @@
 int main(void)
 {
     // Output compare A = D6
-    Pin pwm0a = PIN_TIMER0_A_D6;
-    Pin pwm0b = PIN_TIMER0_B_D5;
-    Pin pwm1a = PIN_TIMER1_A_D9;
-    Pin pwm1b = PIN_TIMER1_B_D10;
-    Pin pwm2a = PIN_TIMER2_A_D11;
-    Pin pwm2b = PIN_TIMER2_B_D3;
+    Pin pwm0a = PIN_TIMER0_A;
+    Pin pwm0b = PIN_TIMER0_B;
+    Pin pwm1a = PIN_TIMER1_A;
+    Pin pwm1b = PIN_TIMER1_B;
+    Pin pwm2a = PIN_TIMER2_A;
+    Pin pwm2b = PIN_TIMER2_B;
     gpio_mode_output(pwm0a);
     gpio_mode_output(pwm0b);
     gpio_mode_output(pwm1a);

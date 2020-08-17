@@ -14,46 +14,75 @@ void gpio_mode_output_inverse(Pin pin);
 void gpio_write(Pin pin, uint8_t value);
 uint8_t gpio_read(Pin pin);
 
-extern const Pin PIN_D0;
-extern const Pin PIN_D1;
-extern const Pin PIN_D2;
-extern const Pin PIN_D3;
-extern const Pin PIN_D4;
-extern const Pin PIN_D5;
-extern const Pin PIN_D6;
-extern const Pin PIN_D7;
-extern const Pin PIN_D8;
-extern const Pin PIN_D9;
-extern const Pin PIN_D10;
-extern const Pin PIN_D11;
-extern const Pin PIN_D12;
-extern const Pin PIN_D13;
-extern const Pin PIN_A0;
-extern const Pin PIN_A1;
-extern const Pin PIN_A2;
-extern const Pin PIN_A3;
-extern const Pin PIN_A4;
-extern const Pin PIN_A5;
-extern const Pin PIN_XTAL1;
-extern const Pin PIN_XTAL2;
-extern const Pin PIN_RESET;
+extern const Pin PIN_PB0;
+extern const Pin PIN_PB1;
+extern const Pin PIN_PB2;
+extern const Pin PIN_PB3;
+extern const Pin PIN_PB4;
+extern const Pin PIN_PB5;
+extern const Pin PIN_PB6;
+extern const Pin PIN_PB7;
 
-#define PIN_BUILT_IN_LED PIN_D13
+extern const Pin PIN_PC0;
+extern const Pin PIN_PC1;
+extern const Pin PIN_PC2;
+extern const Pin PIN_PC3;
+extern const Pin PIN_PC4;
+extern const Pin PIN_PC5;
+extern const Pin PIN_PC6;
+// No PC7 pin
 
-#define PIN_SS PIN_D10
-#define PIN_MOSI PIN_D11
-#define PIN_MISO PIN_D12
-#define PIN_SCK PIN_D13
-#define PIN_SCL PIN_A5
-#define PIN_SDA PIN_A4
-#define PIN_RX PIN_D0
-#define PIN_TX PIN_D2
+extern const Pin PIN_PD0;
+extern const Pin PIN_PD1;
+extern const Pin PIN_PD2;
+extern const Pin PIN_PD3;
+extern const Pin PIN_PD4;
+extern const Pin PIN_PD5;
+extern const Pin PIN_PD6;
+extern const Pin PIN_PD7;
 
-#define PIN_TIMER0_A_D6 PIN_D6
-#define PIN_TIMER0_B_D5 PIN_D5
-#define PIN_TIMER1_A_D9 PIN_D9
-#define PIN_TIMER1_B_D10 PIN_D10
-#define PIN_TIMER2_A_D11 PIN_D11
-#define PIN_TIMER2_B_D3 PIN_D3
+
+#define PIN_ARDUINO_D0 PIN_PD0
+#define PIN_ARDUINO_D1 PIN_PD1
+#define PIN_ARDUINO_D2 PIN_PD2
+#define PIN_ARDUINO_D3 PIN_PD3
+#define PIN_ARDUINO_D4 PIN_PD4
+#define PIN_ARDUINO_D5 PIN_PD5
+#define PIN_ARDUINO_D6 PIN_PD6
+#define PIN_ARDUINO_D7 PIN_PD7
+#define PIN_ARDUINO_D8 PIN_PB0
+#define PIN_ARDUINO_D9 PIN_PB1
+#define PIN_ARDUINO_D10 PIN_PB2
+#define PIN_ARDUINO_D11 PIN_PB3
+#define PIN_ARDUINO_D12 PIN_PB4
+#define PIN_ARDUINO_D13PIN_PB5
+
+#define PIN_ARDUINO_A0 PIN_PC0
+#define PIN_ARDUINO_A1 PIN_PC1
+#define PIN_ARDUINO_A2 PIN_PC2
+#define PIN_ARDUINO_A3 PIN_PC3
+#define PIN_ARDUINO_A4 PIN_PC4
+#define PIN_ARDUINO_A5 PIN_PC5
+
+#define PIN_ARDUINO_LED PIN_PB5
+
+#define PIN_SS PIN_PB2
+#define PIN_MOSI PIN_PB3
+#define PIN_MISO PIN_PB4
+#define PIN_SCK PIN_PB5
+#define PIN_SCL PIN_PC5
+#define PIN_SDA PIN_PC4
+#define PIN_RX PIN_PD0
+#define PIN_TX PIN_PD1
+#define PIN_XTAL1 PIN_PB6
+#define PIN_XTAL2 PIN_PB7
+#define PIN_RESET PIN_PC6
+
+#define PIN_TIMER0_A PIN_PD6
+#define PIN_TIMER0_B PIN_PD5
+#define PIN_TIMER1_A PIN_PB1
+#define PIN_TIMER1_B PIN_PB2
+#define PIN_TIMER2_A PIN_PB3
+#define PIN_TIMER2_B PIN_PD3
 
 #endif

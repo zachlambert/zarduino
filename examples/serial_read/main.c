@@ -6,7 +6,7 @@
 
 int main(void)
 {
-    Pin led = PIN_BUILT_IN_LED;
+    Pin led = PIN_ARDUINO_LED;
     uart_init(); 
     char value;
     gpio_mode_output(led);
