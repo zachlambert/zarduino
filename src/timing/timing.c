@@ -207,7 +207,7 @@ void timer0_init_as_timer_ms(float ms, void (*callback)(void))
     reg_write_bit(&TCCR0A, WGM00, 0);
 
     uint8_t clock = TIMER0_CLOCK_CLK_DIV_1024;
-    reg_write_mask(&TCCR0B, 3, 0b111, clock);
+    reg_write_mask(&TCCR0B, 0, 0b111, clock);
 
     uint64_t clock_cycles = (ms * F_CPU)/(1000.0f*1024);
     counter_timer0 = 0;
