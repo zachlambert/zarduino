@@ -251,7 +251,7 @@ uint64_t timer0_accurate_get_ticks(void)
     // 2^56 ~= 7*10^16 (unit 62.5ns)
     //       = 4.375*10^9 seconds
     //       = 138 years
-    return counter_timer0 * 255 + TCNT0;
+    return counter_timer0 * 256 + TCNT0;
 }
 
 void timer0_accurate_reset(void)
