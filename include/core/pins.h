@@ -85,4 +85,7 @@ extern const Pin PIN_PD7;
 #define PIN_TIMER2_A PIN_PB3
 #define PIN_TIMER2_B PIN_PD3
 
+#define PIN_INT0 PIN_PD2
+#define PIN_INT1 PIN_PD3
+
 #endif
