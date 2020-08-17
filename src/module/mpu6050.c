@@ -76,13 +76,17 @@ void mpu6050_init(MPU6050Config *config)
     float gyro_range;
     switch (config->gyro_range) {
         case MPU6050_GYRO_RANGE_PM_250_DEGPS:
-            gyro_range = 250;
+            gyro_range = 250.0f;
+            break;
         case MPU6050_GYRO_RANGE_PM_500_DEGPS:
-            gyro_range = 500;
+            gyro_range = 500.0f;
+            break;
         case MPU6050_GYRO_RANGE_PM_1000_DEGPS:
-            gyro_range = 1000;
-        case MPU6050_GYRO_RANGE_PM_2000_DEGPS:
-            gyro_range = 2000;
+            gyro_range = 1000.0f;
+            break;
+        default:
+            gyro_range = 2000.0f;
+            break;
     }
     // 16-bit signed integer, range = +-32768
     config->gyro_sensitivity = gyro_range/32768.0;
@@ -91,12 +95,16 @@ void mpu6050_init(MPU6050Config *config)
     switch (config->gyro_range) {
         case MPU6050_ACCEL_RANGE_PM_2_G:
             accel_range = 2;//*9.81;
+            break;
         case MPU6050_ACCEL_RANGE_PM_4_G:
             accel_range = 4;//*9.81;
+            break;
         case MPU6050_ACCEL_RANGE_PM_8_G:
             accel_range = 8;//*9.81;
-        case MPU6050_ACCEL_RANGE_PM_16_G:
+            break;
+        default:
             accel_range = 16;//*9.81;
+            break;
     }
     // 16-bit signed integer, range = +-32768
     config->accel_sensitivity = accel_range/32768.0;
@@ -119,7 +127,7 @@ void mpu6050_read_gyro(MPU6050Config *config, float gyro[3])
     i2c_read_register(config->i2c_address, GYRO_start_address, GYRO, 6);
 
     for (size_t i = 0; i < 3; i++)
-        gyro[i] = (float)(GYRO[2*i]<<8 | GYRO[2*i+1]) * config->gyro_sensitivity;
+        gyro[i] = ((float)(GYRO[2*i]<<8 | GYRO[2*i+1])) * config->gyro_sensitivity;
 }
 
 void mpu6050_read_data(MPU6050Config *config, MPU6050Data *data)
