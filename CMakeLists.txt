@@ -40,6 +40,6 @@ set_target_properties(zarduino PROPERTIES PUBLIC_HEADER
 
 install(TARGETS zarduino
     ARCHIVE DESTINATION lib
-    PUBLIC_HEADER DESTINATION include/zarduino
-    INCLUDES DESTINATION include
+    # PUBLIC_HEADER DESTINATION include/zarduino
 )
+install(DIRECTORY include/ DESTINATION include/zarduino PATTERN include/)
