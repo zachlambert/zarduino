@@ -1,8 +1,8 @@
-#include "module/radio.h"
-#include "core/pins.h"
-#include "comms/uart.h"
-#include "comms/spi.h"
-#include "timing/delay.h"
+#include "zarduino/module/radio.h"
+#include "zarduino/core/pins.h"
+#include "zarduino/comms/uart.h"
+#include "zarduino/comms/spi.h"
+#include "zarduino/timing/delay.h"
 
 #include <stdint.h>
 

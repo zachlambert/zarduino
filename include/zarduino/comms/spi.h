@@ -1,7 +1,7 @@
 #ifndef ZARDUINO_COMMS_SPI
 #define ZARDUINO_COMMS_SPI
 
-#include "core/pins.h"
+#include "zarduino/core/pins.h"
 
 #include <stdint.h>
 #include <stdlib.h>

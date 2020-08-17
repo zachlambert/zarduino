@@ -1,5 +1,5 @@
-#include "comms/uart.h"
-#include "core/adc.h"
+#include "zarduino/comms/uart.h"
+#include "zarduino/core/adc.h"
 #include <avr/io.h>
 
 int main(void)

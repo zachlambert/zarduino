@@ -1,7 +1,7 @@
-#include "module/mpu6050.h"
-#include "comms/i2c.h"
-#include "core/regs.h"
-#include "comms/uart.h"
+#include "zarduino/module/mpu6050.h"
+#include "zarduino/comms/i2c.h"
+#include "zarduino/core/regs.h"
+#include "zarduino/comms/uart.h"
 
 #include <math.h>
 

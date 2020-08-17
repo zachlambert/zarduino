@@ -11,7 +11,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 include(tools/target_cmake_scripts/arduino_uno.cmake)
 
 add_library(zarduino STATIC
-    include/core/pins.h
     src/comms/uart.c
     src/comms/spi.c
     src/comms/i2c.c

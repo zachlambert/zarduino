@@ -1,8 +1,8 @@
-#include "core/interrupt.h"
-#include "core/regs.h"
+#include "zarduino/core/interrupt.h"
+#include "zarduino/core/regs.h"
 #include <avr/io.h>
 #include <stdlib.h>
-#include "core/pins.h"
+#include "zarduino/core/pins.h"
 #include "core/pin_data.h"
 #include <avr/interrupt.h>
 

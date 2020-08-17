@@ -1,5 +1,5 @@
-#include "core/adc.h"
-#include "core/regs.h"
+#include "zarduino/core/adc.h"
+#include "zarduino/core/regs.h"
 #include <avr/io.h>
 #include <stdbool.h>
 #include <avr/interrupt.h>

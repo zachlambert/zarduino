@@ -1,5 +1,5 @@
-#include "timing/timing.h"
-#include "core/regs.h"
+#include "zarduino/timing/timing.h"
+#include "zarduino/core/regs.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
 

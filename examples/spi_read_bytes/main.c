@@ -1,7 +1,7 @@
-#include "comms/uart.h"
-#include "timing/delay.h"
-#include "core/pins.h"
-#include "comms/spi.h"
+#include "zarduino/comms/uart.h"
+#include "zarduino/timing/delay.h"
+#include "zarduino/core/pins.h"
+#include "zarduino/comms/spi.h"
 
 #include <stdint.h>
 

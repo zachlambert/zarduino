@@ -1,9 +1,9 @@
-#include "core/pins.h"
+#include "zarduino/core/pins.h"
 #include "core/pin_data.h"
 
 #include <avr/io.h>
 
-#include "core/regs.h"
+#include "zarduino/core/regs.h"
 
 void gpio_mode_input(Pin pin)
 {

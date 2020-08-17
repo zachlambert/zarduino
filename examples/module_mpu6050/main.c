@@ -1,8 +1,8 @@
 
-#include "comms/uart.h"
-#include "module/mpu6050.h"
-#include "timing/delay.h"
-#include "comms/i2c.h"
+#include "zarduino/comms/uart.h"
+#include "zarduino/module/mpu6050.h"
+#include "zarduino/timing/delay.h"
+#include "zarduino/comms/i2c.h"
 
 int main(void)
 {

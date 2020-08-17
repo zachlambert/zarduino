@@ -2,7 +2,7 @@
 #define ZARDUINO_CORE_ADC
 
 #include <stdint.h>
-#include "core/pins.h"
+#include "zarduino/core/pins.h"
 
 // If a higher sample rate is required, the resolution will
 // be lower.

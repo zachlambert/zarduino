@@ -1,7 +1,7 @@
-#include "module/radio.h"
-#include "comms/spi.h"
-#include "core/pins.h"
-#include "comms/uart.h"
+#include "zarduino/module/radio.h"
+#include "zarduino/comms/spi.h"
+#include "zarduino/core/pins.h"
+#include "zarduino/comms/uart.h"
 
 #include "module/radio_constants.h"
 

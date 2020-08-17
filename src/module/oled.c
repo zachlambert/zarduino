@@ -1,7 +1,7 @@
-#include "module/oled.h"
+#include "zarduino/module/oled.h"
 #include "module/oled_font.h"
-#include "comms/i2c.h"
-#include "comms/uart.h"
+#include "zarduino/comms/i2c.h"
+#include "zarduino/comms/uart.h"
 
 #include <string.h>
 

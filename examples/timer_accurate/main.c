@@ -1,6 +1,6 @@
-#include "timing/timing.h"
-#include "timing/delay.h"
-#include "comms/uart.h"
+#include "zarduino/timing/timing.h"
+#include "zarduino/timing/delay.h"
+#include "zarduino/comms/uart.h"
 
 #include <stdint.h>
 

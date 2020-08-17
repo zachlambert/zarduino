@@ -1,7 +1,7 @@
-#include "comms/spi.h"
-#include "core/regs.h"
+#include "zarduino/comms/spi.h"
+#include "zarduino/core/regs.h"
 #include "core/pin_data.h"
-#include "comms/uart.h"
+#include "zarduino/comms/uart.h"
 
 #include <avr/io.h>
 #include <avr/interrupt.h>

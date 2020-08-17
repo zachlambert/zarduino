@@ -1,7 +1,7 @@
 #include <string.h>
-#include "comms/uart.h"
-#include "timing/delay.h"
-#include "core/pins.h"
+#include "zarduino/comms/uart.h"
+#include "zarduino/timing/delay.h"
+#include "zarduino/core/pins.h"
 #include <stdio.h>
 
 int main(void)

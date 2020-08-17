@@ -1,6 +1,6 @@
-#include "comms/i2c.h"
-#include "core/regs.h"
-#include "core/pins.h"
+#include "zarduino/comms/i2c.h"
+#include "zarduino/core/regs.h"
+#include "zarduino/core/pins.h"
 #include <avr/io.h>
 
 // Status codes for master mode

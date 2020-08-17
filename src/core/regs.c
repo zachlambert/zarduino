@@ -1,4 +1,4 @@
-#include "core/regs.h"
+#include "zarduino/core/regs.h"
 
 void reg_write_bit(volatile uint8_t *reg, uint8_t bit, uint8_t value)
 {

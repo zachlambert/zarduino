@@ -1,5 +1,5 @@
-#include "timing/timing.h"
-#include "comms/uart.h"
+#include "zarduino/timing/timing.h"
+#include "zarduino/comms/uart.h"
 
 #include <stdint.h>
 
@@ -19,7 +19,7 @@ void callback1(void)
 void callback2(void)
 {
     num2++;
-    printf("Callbacks %lu %lu %lu\n", num0, num1, num2);    
+    printf("Callbacks %lu %lu %lu\n", num0, num1, num2);
 }
 
 int main(void)

@@ -1,6 +1,6 @@
-#include "module/oled.h"
-#include "comms/i2c.h"
-#include "timing/delay.h"
+#include "zarduino/module/oled.h"
+#include "zarduino/comms/i2c.h"
+#include "zarduino/timing/delay.h"
 #include <stdio.h>
 
 int main(void)

@@ -1,6 +1,6 @@
-#include "core/pins.h"
-#include "core/interrupt.h"
-#include "comms/uart.h"
+#include "zarduino/core/pins.h"
+#include "zarduino/core/interrupt.h"
+#include "zarduino/comms/uart.h"
 
 int num;
 void callback(void)

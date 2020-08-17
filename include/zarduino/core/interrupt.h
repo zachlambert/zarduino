@@ -1,7 +1,7 @@
 #ifndef ZARDUINO_CORE_INTERRUPT
 #define ZARDUINO_CORE_INTERRUPT
 
-#include "core/pins.h"
+#include "zarduino/core/pins.h"
 
 // (External interrupts)
 

@@ -1,6 +1,6 @@
 
-#include "core/pins.h"
-#include "timing/timing.h"
+#include "zarduino/core/pins.h"
+#include "zarduino/timing/timing.h"
 
 int main(void)
 {

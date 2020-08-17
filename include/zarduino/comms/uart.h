@@ -1,8 +1,8 @@
 #ifndef ZARDUINO_COMMS_UART
 #define ZARDUINO_COMMS_UART
 
-#include "core/pins.h"
-#include "core/regs.h"
+#include "zarduino/core/pins.h"
+#include "zarduino/core/regs.h"
 
 #include <stdio.h>
 

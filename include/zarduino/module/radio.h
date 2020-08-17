@@ -3,7 +3,7 @@
 
 // nRF24L01 module
 
-#include "core/pins.h"
+#include "zarduino/core/pins.h"
 #include <stdlib.h>
 
 typedef enum {
