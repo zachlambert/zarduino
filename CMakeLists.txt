@@ -35,4 +35,4 @@ add_subdirectory(examples)
 install(TARGETS zarduino
     ARCHIVE DESTINATION lib
 )
-install(DIRECTORY include/ DESTINATION include/zarduino PATTERN include/)
+install(DIRECTORY include/ DESTINATION include PATTERN include/)

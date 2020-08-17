@@ -116,7 +116,7 @@ void interrupt_external_add_callback(
         reg_write_bit(&EIMSK, INT0, 1); // Enable INT0
         callback_int0 = callback;
     } else {
-        reg_write_mask(&EICRA, 2, 0b11, interrupt_type<<2);
+        reg_write_mask(&EICRA, 2, 0b11, interrupt_type);
         reg_write_bit(&EIMSK, INT1, 1); // Enable INT0
         callback_int1 = callback;
     }
