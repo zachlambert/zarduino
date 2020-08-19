@@ -109,11 +109,7 @@ void mpu6050_init(MPU6050Config *config)
     // 16-bit signed integer, range = +-32768
     config->accel_sensitivity = accel_range/32768.0;
 
-    // Make calibration optional
-    // mpu6050_calibrate(config);
-    // But default the zero values to zero
-    for (size_t i = 0; i<3; i++) config->accel_zero_readings[i] = 0;
-    for (size_t i = 0; i<3; i++) config->gyro_zero_readings[i] = 0;
+    mpu6050_calibrate(config);
 }
 
 void mpu6050_read_accel(MPU6050Config *config, float accel[3])

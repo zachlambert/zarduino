@@ -89,20 +89,22 @@ void interrupt_pin_add_callback(Pin pin, void (*callback)(void))
             reg_write_bit(&PCICR, PCIE0, 1);
         }
         callbacks_pcint0[data->bit] = callback;
+        reg_write_bit(&PCMSK0, data->pcint, 1);
     } else if (data->pcint < 16) {
         if (!reg_read_bit(&PCICR, PCIE1)) {
             PINC_prev = PINC;
             reg_write_bit(&PCICR, PCIE1, 1);
         }
         callbacks_pcint1[data->bit] = callback;
+        reg_write_bit(&PCMSK1, data->pcint-8, 1);
     } else {
         if (!reg_read_bit(&PCICR, PCIE2)) {
             PIND_prev = PIND;
             reg_write_bit(&PCICR, PCIE2, 1);
         }
         callbacks_pcint2[data->bit] = callback;
+        reg_write_bit(&PCMSK2, data->pcint-16, 1);
     }
-    reg_write_bit(&PCMSK0, data->pcint, 1);
 }
 
 void interrupt_external_add_callback(
