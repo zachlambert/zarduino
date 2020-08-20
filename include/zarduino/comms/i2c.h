@@ -35,5 +35,12 @@ void i2c_write_register(
 
 void i2c_write(uint8_t i2c_address, uint8_t *data_in, size_t num_bytes);
 
+// For modules which need more control over the process
+void i2c_send_start(void);
+void i2c_send_repeated_start(void);
+void i2c_send_slave_address(uint8_t i2c_address, uint8_t read);
+void i2c_send_data(uint8_t data);
+uint8_t i2c_receive_data(uint8_t en_ack);
+void i2c_send_stop(void);
 
 #endif

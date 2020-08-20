@@ -6,26 +6,14 @@
 
 typedef struct {
     uint8_t i2c_address;
-    size_t width;
-    size_t height;
 } OLEDConfig;
 
-typedef struct {
-    size_t col;
-    size_t row;
-    uint8_t *i2c_data;
-    size_t i2c_data_size;
-    uint8_t *buffer;
-    size_t buffer_size;
-} OLEDData;
-
 OLEDConfig oled_create_config(void);
-OLEDData oled_create_data(OLEDConfig *config);
 
 void oled_init(OLEDConfig *config);
-void oled_putc(OLEDConfig *config, OLEDData *data, char c);
-void oled_print_string(OLEDConfig *config, OLEDData *data, char *string);
-void oled_clear(OLEDData *data);
-void oled_update(OLEDConfig *config, OLEDData *data);
+void oled_putc(OLEDConfig *config, char c);
+void oled_print_string(OLEDConfig *config, char *string);
+void oled_clear(OLEDConfig *config);
+void oled_flush(OLEDConfig *config);
 
 #endif
