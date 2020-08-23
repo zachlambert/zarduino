@@ -92,6 +92,7 @@ void oled_print_string(OLEDConfig *config, char *string)
 
 void oled_clear(OLEDConfig *config)
 {
+    if (oled_row==0) return;
     i2c_send_start();
     i2c_send_slave_address(config->i2c_address, 0);
     i2c_send_data(0x40);

@@ -31,7 +31,7 @@ const uint8_t command_NOP = 0xFF;
 
 // === Registers ===
 
-const uint8_t CONFIG_address = 0x00;
+#define CONFIG_address 0x00
 const uint8_t EN_AA_address = 0x01;
 const uint8_t EN_RXADDR_address = 0x02;
 const uint8_t SETUP_AW_address = 0x03;
