@@ -10,7 +10,7 @@ void callback(void)
 
 int main(void)
 {
-    uart_init();
+    uart_init(0);
     printf("Starting\n");
     interrupt_external_add_callback(
         INTERRUPT_EXTERNAL_0,

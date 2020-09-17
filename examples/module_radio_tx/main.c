@@ -8,7 +8,7 @@
 
 int main(void)
 {
-    uart_init();
+    uart_init(0);
 
     SPIConfig spi_config = spi_create_config();
     spi_init_master(&spi_config);

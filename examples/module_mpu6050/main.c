@@ -6,7 +6,7 @@
 
 int main(void)
 {
-    uart_init();
+    uart_init(0);
 
     I2CConfig i2c_config = i2c_create_config();
     i2c_init_master(&i2c_config);

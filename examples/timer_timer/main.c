@@ -24,7 +24,7 @@ void callback2(void)
 
 int main(void)
 {
-    uart_init();
+    uart_init(0);
     printf("Starting\n");
 
     timer0_init_as_timer_ms(250, callback0);

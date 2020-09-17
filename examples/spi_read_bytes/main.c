@@ -14,7 +14,7 @@ int main(void)
     gpio_mode_output(CS);
     gpio_write(CS, 1);
 
-    uart_init();
+    uart_init(0);
 
     // nRF24L01 radio module
     // Write to a register:

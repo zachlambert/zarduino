@@ -4,7 +4,7 @@
 
 int main(void)
 {
-    uart_init(); 
+    uart_init(0);
 
     char *message = "Hello, world\n";
     while (1) {

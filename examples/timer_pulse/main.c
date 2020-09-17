@@ -19,7 +19,7 @@ void echo_callback(void)
 
 int main(void)
 {
-    uart_init();
+    uart_init(0);
     printf("Starting\n");
 
     trigger = PIN_ARDUINO_D3;

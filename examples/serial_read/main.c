@@ -7,7 +7,7 @@
 int main(void)
 {
     Pin led = PIN_ARDUINO_LED;
-    uart_init(); 
+    uart_init(0);
     char value;
     gpio_mode_output(led);
     while (1) {

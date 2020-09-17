@@ -4,7 +4,7 @@
 
 int main(void)
 {
-    uart_init();
+    uart_init(0);
     ADCConfig config = adc_create_config();
     adc_initialise(&config);
 

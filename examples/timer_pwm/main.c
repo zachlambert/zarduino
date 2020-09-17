@@ -21,7 +21,7 @@ int main(void)
     timer0_init_as_pwm();
     timer0_set_duty_cycle_a(0.8); //D6
     timer0_set_duty_cycle_b(0.2); //D5
-    
+
     timer1_init_as_pwm();
     timer1_set_duty_cycle_a(0.7); //D9
     timer1_set_duty_cycle_b(0.3); //D10

@@ -11,7 +11,7 @@ void callback(void)
 
 int main(void)
 {
-    uart_init();
+    uart_init(0);
     Pin interrupt_pin = PIN_ARDUINO_D10;
     interrupt_pin_add_callback(
         interrupt_pin,

@@ -111,7 +111,8 @@ uint16_t uart_read_uint16(void)
 {
     uint8_t data[2];
     uart_read_bytes(data, 2);
-    return data[0] | data[1]<<8;
+    uint16_t result = data[0] | (uint16_t)data[1]<<8;
+    return result;
 }
 
 void uart_write_int16(int16_t value)
@@ -127,7 +128,8 @@ int16_t uart_read_int16(void)
 {
     uint8_t data[2];
     uart_read_bytes(data, 2);
-    return data[0] | data[1]<<8;
+    int16_t result = data[0] | (uint16_t)data[1]<<8;
+    return result;
 }
 
 // 32-bit integers
@@ -147,7 +149,12 @@ uint32_t uart_read_uint32(void)
 {
     uint8_t data[4];
     uart_read_bytes(data, 4);
-    return data[0] | data[1]<<8 | data[2]<<16 | data[3]<<24;
+    uint32_t result =
+        data[0] |
+        (uint32_t)data[1]<<8 |
+        (uint32_t)data[2]<<16 |
+        (uint32_t)data[3]<<24;
+    return result;
 }
 
 void uart_write_int32(int32_t value)
@@ -165,5 +172,10 @@ int32_t uart_read_int32(void)
 {
     uint8_t data[4];
     uart_read_bytes(data, 4);
-    return data[0] | data[1]<<8 | data[2]<<16 | data[3]<<24;
+    int32_t result =
+        data[0] |
+        (uint32_t)data[1]<<8 |
+        (uint32_t)data[2]<<16 |
+        (uint32_t)data[3]<<24;
+    return result;
 }

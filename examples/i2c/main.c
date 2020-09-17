@@ -8,7 +8,7 @@ int main(void)
     i2c_config.bit_rate_reduction = 0xFF;
     i2c_init_master(&i2c_config);
 
-    uart_init();
+    uart_init(0);
 
     // MPU6050 sensor
 
