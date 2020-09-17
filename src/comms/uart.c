@@ -1,58 +1,169 @@
 #include "zarduino/comms/uart.h"
 #include <avr/io.h>
 
-void uart_init(void)
+UartConfig uart_create_config(void)
 {
-    uint16_t baud_rate = 9600;
-    uint16_t ubbr_value = ((F_CPU/16)/baud_rate) - 1;
+    UartConfig config;
+    config.baud_rate = 9600;
+    config.bits = UART_BITS_8;
+    config.enable_printf = 1;
+    return config;
+}
+
+void uart_putchar(char c, FILE *stream)
+{
+    if (c == '\n') c = '\r';
+    uart_write_byte(c);
+}
+
+char uart_getchar(FILE *stream)
+{
+    return uart_read_byte();
+}
+
+
+void uart_init(UartConfig *config)
+{
+    UartConfig default_config = uart_create_config();
+    if (!config) {
+        config = &default_config;
+    }
+
+    uint16_t ubbr_value = ((F_CPU/16)/config->baud_rate) - 1;
+
     // Set baud rate
     UBRR0H = (uint8_t)(ubbr_value >> 8);
     UBRR0L = (uint8_t)ubbr_value;
-
-    // If using double speed, write 1 here:
-    //reg_write_bit(&UCSR0A, UX0A, 0);
 
     // Enable receiver
     reg_write_bit(&UCSR0B, RXEN0, 1);
     // Enable transmitter
     reg_write_bit(&UCSR0B, TXEN0, 1);
 
-    // USART mode select -> UART
-    // reg_write_mask(&UCSR0C, 0b11000000, 0b00 << 6);
+    // USART mode
+    reg_write_mask(&UCSR0C, UMSEL00, 0b11, config->mode);
 
-    // Parity mode -> Disable
-    // reg_write_mask(&UCSR0C, 0b00110000, 0b00 << 4);
+    // Parity mode
+    reg_write_mask(&UCSR0C, UPM00, 0b11, config->parity);
 
-    // Stop select bit -> Leave default
+    // Stop bits
+    reg_write_bit(&UCSR0C, USBS0, config->stop_bits);
 
-    // Character size
-    // Use 8-bit, which requires
-    reg_write_bit(&UCSR0B, UCSZ02, 0);
-    reg_write_bit(&UCSR0C, UCSZ01, 1);
-    reg_write_bit(&UCSR0C, UCSZ00, 1);
+    // Number of bits
+    reg_write_bit(&UCSR0B, UCSZ02, config->bits >> 2);
+    reg_write_mask(&UCSR0C, UCSZ00, 0b11, config->bits);
 
-    static FILE uart_ostream = FDEV_SETUP_STREAM(
-        uart_putchar, NULL, _FDEV_SETUP_WRITE
-    );
-    static FILE uart_istream = FDEV_SETUP_STREAM(
-        NULL, uart_getchar, _FDEV_SETUP_READ
-    );
+    if (config->enable_printf) {
+        static FILE uart_ostream = FDEV_SETUP_STREAM(
+            uart_putchar, NULL, _FDEV_SETUP_WRITE
+        );
+        static FILE uart_istream = FDEV_SETUP_STREAM(
+            NULL, uart_getchar, _FDEV_SETUP_READ
+        );
 
-    stdout = &uart_ostream;
-    stdin = &uart_istream;
-}
-
-void uart_putchar(char c, FILE *stream)
-{
-    if (c == '\n') {
-        uart_putchar('\r', stream);
+        stdout = &uart_ostream;
+        stdin = &uart_istream;
     }
-    while (!reg_read_bit(&UCSR0A, UDRE0));
-    UDR0 = c;
 }
 
-char uart_getchar(FILE *stream)
+// Core write and read functions
+
+void uart_write_byte(uint8_t data)
+{
+    while (!reg_read_bit(&UCSR0A, UDRE0));
+    UDR0 = data;
+}
+
+uint8_t uart_read_byte(void)
 {
     while (!reg_read_bit(&UCSR0A, UDRE0));
     return UDR0;
+}
+
+// Write and read arrays of bytes
+
+void uart_write_bytes(uint8_t *data_in, size_t n)
+{
+    for (size_t i = 0; i < n; i++) {
+        uart_write_byte(data_in[i]);
+    }
+}
+
+void uart_read_bytes(uint8_t *data_out, size_t n)
+{
+    for (size_t i = 0; i < n; i++) {
+        data_out[i] = uart_read_byte();
+    }
+}
+
+// 16-bit integers
+
+void uart_write_uint16(uint16_t value)
+{
+    uint8_t data[] = {
+        value,
+        value>>8
+    };
+    uart_write_bytes(data, 2);
+}
+
+uint16_t uart_read_uint16(void)
+{
+    uint8_t data[2];
+    uart_read_bytes(data, 2);
+    return data[0] | data[1]<<8;
+}
+
+void uart_write_int16(int16_t value)
+{
+    uint8_t data[] = {
+        value,
+        value>>8
+    };
+    uart_write_bytes(data, 2);
+}
+
+int16_t uart_read_int16(void)
+{
+    uint8_t data[2];
+    uart_read_bytes(data, 2);
+    return data[0] | data[1]<<8;
+}
+
+// 32-bit integers
+
+void uart_write_uint32(uint32_t value)
+{
+    uint8_t data[] = {
+        value,
+        value>>8,
+        value>>16,
+        value>>24
+    };
+    uart_write_bytes(data, 4);
+}
+
+uint32_t uart_read_uint32(void)
+{
+    uint8_t data[4];
+    uart_read_bytes(data, 4);
+    return data[0] | data[1]<<8 | data[2]<<16 | data[3]<<24;
+}
+
+void uart_write_int32(int32_t value)
+{
+    uint8_t data[] = {
+        value,
+        value>>8,
+        value>>16,
+        value>>24
+    };
+    uart_write_bytes(data, 4);
+}
+
+int32_t uart_read_int32(void)
+{
+    uint8_t data[4];
+    uart_read_bytes(data, 4);
+    return data[0] | data[1]<<8 | data[2]<<16 | data[3]<<24;
 }
