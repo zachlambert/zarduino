@@ -6,13 +6,14 @@ UartConfig uart_create_config(void)
     UartConfig config;
     config.baud_rate = 9600;
     config.bits = UART_BITS_8;
-    config.enable_printf = 1;
     return config;
 }
 
 void uart_putchar(char c, FILE *stream)
 {
-    if (c == '\n') c = '\r';
+    if (c == '\n') {
+        uart_putchar('\r', stream);
+    };
     uart_write_byte(c);
 }
 
@@ -53,17 +54,15 @@ void uart_init(UartConfig *config)
     reg_write_bit(&UCSR0B, UCSZ02, config->bits >> 2);
     reg_write_mask(&UCSR0C, UCSZ00, 0b11, config->bits);
 
-    if (config->enable_printf) {
-        static FILE uart_ostream = FDEV_SETUP_STREAM(
-            uart_putchar, NULL, _FDEV_SETUP_WRITE
-        );
-        static FILE uart_istream = FDEV_SETUP_STREAM(
-            NULL, uart_getchar, _FDEV_SETUP_READ
-        );
+    static FILE uart_ostream = FDEV_SETUP_STREAM(
+        uart_putchar, NULL, _FDEV_SETUP_WRITE
+    );
+    static FILE uart_istream = FDEV_SETUP_STREAM(
+        NULL, uart_getchar, _FDEV_SETUP_READ
+    );
 
-        stdout = &uart_ostream;
-        stdin = &uart_istream;
-    }
+    stdout = &uart_ostream;
+    stdin = &uart_istream;
 }
 
 // Core write and read functions

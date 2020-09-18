@@ -37,12 +37,24 @@ typedef struct {
     UartParity parity;
     UartStopBits stop_bits;
     UartBits bits;
-    uint8_t enable_printf;
 } UartConfig;
 
 UartConfig uart_create_config(void);
 void uart_init(UartConfig *config);
-void uart_write_byte(uint8_t byte);
+
+void uart_write_byte(uint8_t data);
 uint8_t uart_read_byte(void);
+void uart_write_bytes(uint8_t *data_in, size_t n);
+void uart_read_bytes(uint8_t *data_out, size_t n);
+
+void uart_write_uint16(uint16_t value);
+uint16_t uart_read_uint16(void);
+void uart_write_int16(int16_t value);
+int16_t uart_read_int16(void);
+
+void uart_write_uint32(uint32_t value);
+uint32_t uart_read_uint32(void);
+void uart_write_int32(int32_t value);
+int32_t uart_read_int32(void);
 
 #endif
