@@ -14,7 +14,8 @@ int main(void)
     ADCConfig config = adc_create_config();
     adc_initialise(&config);
 
-    adc_read_callback_repeat(adc_callback);
+    Pin pin = PIN_ARDUINO_A1;
+    adc_read_callback_repeat(pin, adc_callback);
     // Put the code in an infinite loop here, so the
     // program doesn't terminate
     while (1) {}

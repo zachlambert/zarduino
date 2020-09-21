@@ -9,6 +9,7 @@ typedef struct {
     volatile uint8_t *input_reg; // PINX
     uint8_t bit;
     uint8_t pcint;
+    uint8_t adc_pin;
 } PinData;
 
 #endif

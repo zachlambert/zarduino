@@ -432,9 +432,10 @@ void timer2_set_duty_cycle_b(float duty_cycle)
 void (*callback_timer2)(void);
 uint64_t counter_timer2;
 uint64_t counter_max_timer2;
+uint8_t timer2_exact = 0;
 ISR(TIMER2_OVF_vect)
 {
-    if (counter_timer2 == counter_max_timer2) {
+    if (!timer2_exact && counter_timer2 == counter_max_timer2) {
         reg_write_bit(&TIMSK2, OCIE2A, 1);
     }
     counter_timer2++;
@@ -477,4 +478,40 @@ void timer2_init_as_timer_ms(float ms, void (*callback)(void))
         reg_write_bit(&TIMSK2, OCIE2A, 1);
     }
 
+}
+
+void timer2_init_as_timer_accurate(void)
+{
+    reg_write_mask(&TCCR0A, 6, 0b11, 0);
+    reg_write_mask(&TCCR0A, 4, 0b11, 0);
+
+    reg_write_bit(&TCCR0B, WGM02, 0);
+    reg_write_bit(&TCCR0A, WGM01, 0);
+    reg_write_bit(&TCCR0A, WGM00, 0);
+
+    uint8_t clock = TIMER0_CLOCK_CLK;
+    reg_write_mask(&TCCR0B, 0, 0b111, clock);
+
+    // Enable interrupts
+    sei();
+    timer0_exact = 1;
+    reg_write_bit(&TIMSK0, TOIE0, 1);
+}
+
+uint64_t timer2_accurate_get_ticks(void)
+{
+    // counter_timer0 = units of (256/F_CPU) = 16us
+    // Factor = 1ms / 16us = 62.5
+    // Units are 1/F_CPU = 62.5ns
+    // Overflows if counter_timer0 > 2^64/256 = 2^56
+    // 2^56 ~= 7*10^16 (unit 62.5ns)
+    //       = 4.375*10^9 seconds
+    //       = 138 years
+    return counter_timer0 * 256 + TCNT0;
+}
+
+void timer2_accurate_reset(void)
+{
+    counter_timer0 = 0;
+    TCNT0 = 0;
 }

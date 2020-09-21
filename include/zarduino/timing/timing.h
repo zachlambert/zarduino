@@ -23,5 +23,8 @@ void timer2_init_as_pwm(void);
 void timer2_set_duty_cycle_a(float duty_cycle);
 void timer2_set_duty_cycle_b(float duty_cycle);
 void timer2_init_as_timer_ms(float ms, void (*callback)(void));
+void timer2_init_as_timer_accurate(void);
+void timer2_accurate_reset(void);
+uint64_t timer2_accurate_get_ticks(void);
 
 #endif

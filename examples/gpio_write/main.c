@@ -4,7 +4,7 @@
 
 int main(void)
 {
-    Pin led = PIN_ARDUINO_LED;
+    Pin led = PIN_PD4;
     gpio_mode_output(led);
     while (1) {
         gpio_write(led, 1);

@@ -1,5 +1,6 @@
 #include "zarduino/comms/uart.h"
 #include <avr/io.h>
+#include <stdlib.h>
 
 UartConfig uart_create_config(void)
 {

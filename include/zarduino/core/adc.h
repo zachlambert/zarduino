@@ -53,9 +53,9 @@ typedef void (*ADCCallback)(uint16_t);
 
 ADCConfig adc_create_config(void);
 void adc_initialise(ADCConfig *config);
-uint16_t adc_read_wait(void);
-void adc_read_callback_single(ADCCallback adc_callback);
-void adc_read_callback_repeat(ADCCallback adc_callback);
+uint16_t adc_read_wait(Pin pin);
+void adc_read_callback_single(Pin pin, ADCCallback adc_callback);
+void adc_read_callback_repeat(Pin pin, ADCCallback adc_callback);
 void adc_read_callback_repeat_stop(void);
 
 #endif

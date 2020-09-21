@@ -1,5 +1,6 @@
 #include "zarduino/core/adc.h"
 #include "zarduino/core/regs.h"
+#include "core/pin_data.h"
 #include <avr/io.h>
 #include <stdbool.h>
 #include <avr/interrupt.h>
@@ -18,14 +19,20 @@ void adc_initialise(ADCConfig *config)
     reg_write_mask(&ADMUX, 6, 0b11, config->reference);
     reg_write_bit(&ADCSRA, ADEN, 1); 
     reg_write_mask(&ADCSRA, 0, 0b111, config->prescaler_select);
-    reg_write_mask(&ADMUX, 0, 0b111, config->analog_pin);
     // Disable the digital input too
     DIDR0 = 0;
-    reg_write_bit(&DIDR0, config->analog_pin, 1);
 }
 
-uint16_t adc_read_wait(void)
+void adc_enable_pin(Pin pin)
 {
+    PinData *data = pin;
+    if (data->adc_pin > 5) return;
+    reg_write_mask(&ADMUX, 0, 0b111, data->adc_pin);
+}
+
+uint16_t adc_read_wait(Pin pin)
+{
+    adc_enable_pin(pin);
     reg_write_bit(&ADCSRA, ADIE, 0);
     reg_write_bit(&ADCSRA, ADSC, 1);
     while (reg_read_bit(&ADCSRA, ADSC));
@@ -43,8 +50,9 @@ ISR(ADC_vect)
         reg_write_bit(&ADCSRA, ADSC, 1);
 }
 
-void adc_read_callback_single(ADCCallback adc_callback)
+void adc_read_callback_single(Pin pin, ADCCallback adc_callback)
 {
+    adc_enable_pin(pin);
     // Set the adc_callback
     current_adc_callback = adc_callback;
     // Enable interrupts
@@ -54,10 +62,10 @@ void adc_read_callback_single(ADCCallback adc_callback)
     reg_write_bit(&ADCSRA, ADSC, 1);
 }
 
-void adc_read_callback_repeat(ADCCallback adc_callback)
+void adc_read_callback_repeat(Pin pin, ADCCallback adc_callback)
 {
     repeat_callback = true;
-    adc_read_callback_single(adc_callback);
+    adc_read_callback_single(pin, adc_callback);
 }
 
 void adc_read_callback_repeat_stop(void)

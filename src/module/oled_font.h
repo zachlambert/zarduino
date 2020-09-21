@@ -5,7 +5,6 @@
 #include <string.h>
 #include <avr/pgmspace.h>
 
-
 // FONT STRUCTURE
 // <-- LEFT -->
 // BOTTOM   TOP
@@ -553,7 +552,6 @@ const uint8_t OLED_BITMAP[(126-32)*8][8] PROGMEM = {
         0b01000011,
         0b01000001,
         0b00000000
-
     }, { // [
         0b00000000,
         0b00000000,
