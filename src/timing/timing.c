@@ -161,13 +161,13 @@ void timer0_init_as_pwm(void)
 
 void timer0_set_duty_cycle_a(float duty_cycle)
 {
-    uint8_t compare_value = (uint8_t)(duty_cycle * 256);
+    uint8_t compare_value = (uint8_t)(duty_cycle * 255);
     OCR0A = compare_value;
 }
 
 void timer0_set_duty_cycle_b(float duty_cycle)
 {
-    uint8_t compare_value = (uint8_t)(duty_cycle * 256);
+    uint8_t compare_value = (uint8_t)(duty_cycle * 255);
     OCR0B = compare_value;
 }
 
@@ -416,13 +416,13 @@ void timer2_init_as_pwm(void)
 
 void timer2_set_duty_cycle_a(float duty_cycle)
 {
-    uint8_t compare_value = (uint8_t)(duty_cycle * 256);
+    uint8_t compare_value = (uint8_t)(duty_cycle * 255);
     OCR2A = compare_value;
 }
 
 void timer2_set_duty_cycle_b(float duty_cycle)
 {
-    uint8_t compare_value = (uint8_t)(duty_cycle * 256);
+    uint8_t compare_value = (uint8_t)(duty_cycle * 255);
     OCR2B = compare_value;
 }
 
