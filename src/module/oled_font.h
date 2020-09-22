@@ -17,7 +17,9 @@
 //
 // Also: Leave bottom row and right column free
 // so there are gaps between characters.
-const uint8_t OLED_BITMAP[(126-32)*8][8] PROGMEM = {
+
+//const uint8_t OLED_BITMAP[(126-32)*8][8] PROGMEM = {
+const uint8_t OLED_BITMAP[(91-32)*8][8] PROGMEM = {
     { //SPACE
         0b00000000,
         0b00000000,
@@ -552,6 +554,9 @@ const uint8_t OLED_BITMAP[(126-32)*8][8] PROGMEM = {
         0b01000011,
         0b01000001,
         0b00000000
+    }
+};
+/*
     }, { // [
         0b00000000,
         0b00000000,
@@ -880,9 +885,11 @@ const uint8_t OLED_BITMAP[(126-32)*8][8] PROGMEM = {
         0b00000000
     }
 };
+*/
 
 void oled_get_bitmap(unsigned char c, uint8_t out[8]){
-    if (c < 32 || c > 126) c = 32;
+    // if (c < 32 || c > 126) c = 32;
+    if (c < 32 || c >= 91) c = 32;
     for (size_t i = 0; i < 8; i++) {
         out[i] = pgm_read_byte(&(OLED_BITMAP[c-32][i]));
     }
