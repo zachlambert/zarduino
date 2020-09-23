@@ -4,12 +4,10 @@
 #include <stdint.h>
 
 typedef struct {
-    volatile uint8_t *direction_reg; // DDRX
-    volatile uint8_t *output_reg; // PORTX
-    volatile uint8_t *input_reg; // PINX
-    uint8_t bit;
-    uint8_t pcint;
-    uint8_t adc_pin;
+    uint8_t port : 2;
+    uint8_t bit : 3;
+    uint8_t pcint : 5;
+    uint8_t adc_pin : 3;
 } PinData;
 
 #endif

@@ -50,11 +50,11 @@ RadioConfig radio_create_config(void)
 
     config.rx_base_address = 0xC2C2C2C2;
     config.rx_pipe_addresses[0] = 0xC2;
-    config.rx_pipe_addresses[1] = 0xC3;
-    config.rx_pipe_addresses[2] = 0xC4;
-    config.rx_pipe_addresses[3] = 0xC5;
-    config.rx_pipe_addresses[4] = 0xC6;
-    config.rx_pipe_enable[0] = 1;
+    // config.rx_pipe_addresses[1] = 0xC3;
+    // config.rx_pipe_addresses[2] = 0xC4;
+    // config.rx_pipe_addresses[3] = 0xC5;
+    // config.rx_pipe_addresses[4] = 0xC6;
+    // config.rx_pipe_enable[0] = 1;
 
     config.rx_payload_sizes[0] = 1;
 
@@ -63,7 +63,7 @@ RadioConfig radio_create_config(void)
 
 void radio_reset_status(RadioConfig *config)
 {
-    uint8_t STATUS;
+    uint8_t STATUS = 0;
     reg_write_bit(&STATUS, RX_DR, 1);
     reg_write_bit(&STATUS, TX_DS, 1);
     reg_write_bit(&STATUS, MAX_RT, 1);

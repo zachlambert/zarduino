@@ -1,6 +1,7 @@
 
 #include "zarduino/core/pins.h"
 #include "zarduino/timing/delay.h"
+#include <avr/io.h>
 
 int main(void)
 {
