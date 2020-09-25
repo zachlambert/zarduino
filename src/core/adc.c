@@ -7,7 +7,7 @@
 
 ADCConfig adc_create_config(void)
 {
-    ADCConfig config;
+    ADCConfig config = {};
     // Provide defaults
     config.reference = ADC_REFERENCE_AVCC;
     config.prescaler_select = ADC_PRESCALER_DIV128;

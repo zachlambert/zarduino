@@ -14,7 +14,7 @@ uint8_t oled_row_buffer[ROW_BUFFER_SIZE];
 
 OLEDConfig oled_create_config()
 {
-    OLEDConfig config;
+    OLEDConfig config = {};
     config.i2c_address = 0x3C;
     return config;
 }
