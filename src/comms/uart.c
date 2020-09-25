@@ -1,10 +1,11 @@
 #include "zarduino/comms/uart.h"
 #include <avr/io.h>
+#include <string.h>
 #include <stdlib.h>
 
 UartConfig uart_create_config(void)
 {
-    UartConfig config;
+    UartConfig config = {};
     config.baud_rate = 9600;
     config.bits = UART_BITS_8;
     return config;
