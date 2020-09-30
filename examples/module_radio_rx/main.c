@@ -14,8 +14,8 @@ int main(void)
     spi_init_master(&spi_config);
 
     RadioConfig radio_config = radio_create_config();
-    radio_config.CSN = PIN_PB0;//PIN_ARDUINO_D6;
-    radio_config.CE = PIN_PD7;//PIN_ARDUINO_D8;
+    radio_config.CSN = PIN_PD7;//PIN_ARDUINO_D6;
+    radio_config.CE = PIN_PB0;//PIN_ARDUINO_D8;
     radio_config.IRQ = 0;
 
     radio_config.rx_base_address = 0xA0000000;
