@@ -50,7 +50,12 @@ RadioConfig radio_create_config(void)
 
     config.rx_base_address = 0xC2C2C2C2;
     config.rx_pipe_addresses[0] = 0xC2;
+    config.rx_pipe_addresses[1] = 0xC3;
+    config.rx_pipe_addresses[2] = 0xC4;
+    config.rx_pipe_addresses[3] = 0xC5;
+    config.rx_pipe_addresses[4] = 0xC6;
     config.rx_pipe_enable[0] = 1;
+
     config.rx_payload_sizes[0] = 1;
 
     return config;
@@ -91,43 +96,33 @@ void radio_init_common(RadioConfig *config)
     radio_register_write(config, CONFIG_address, &CONFIG, 1);
 
     // 0x02 EN_RXADDR
-    {
     uint8_t EN_RXADDR = 0;
     reg_write_bit(&EN_RXADDR, 0, 1); // Always enable pipe 0
     for (size_t i = 0; i < 5; i++) {
         reg_write_bit(&EN_RXADDR, i+1, config->rx_pipe_enable[i]);
     }
     radio_register_write(config, EN_RXADDR_address, &EN_RXADDR, 1);
-    }
 
     // 0x03 SETUP_AW
-    {
     uint8_t SETUP_AW = 0;
     reg_write_mask(&SETUP_AW, AW_shift, AW_mask, config->address_width);
     radio_register_write(config, SETUP_AW_address, &SETUP_AW, 1);
-    }
 
     // 0x04 SETUP_RETR
-    {
     uint8_t SETUP_RETR = 0;
     reg_write_mask(&SETUP_RETR, ARD_shift, ARD_mask, config->auto_retransmit_delay);
     reg_write_mask(&SETUP_RETR, ARC_shift, ARC_mask, config->auto_retransmit_count);
     radio_register_write(config, SETUP_RETR_address, &SETUP_RETR, 1);
-    }
 
     // 0x05 RF_CH
-    {
     uint8_t RF_CH = 0;
     reg_write_mask(&RF_CH, RF_CH_shift, RF_CH_mask, config->frequency_channel);
     radio_register_write(config, RF_CH_address, &RF_CH, 1);
-    }
 
     // 0x06 RF_SETUP
-    {
     uint8_t RF_SETUP = 0;
     reg_write_bit(&RF_SETUP, RF_DR, config->air_data_rate);
     radio_register_write(config, RF_SETUP_address, &RF_SETUP, 1);
-    }
 
     // Addresses
     // - All RX pipes, and TX have 3-5 byte addresses,
@@ -149,46 +144,41 @@ void radio_init_common(RadioConfig *config)
 
     // === TX ADDRESS ===
 
-    {
-        uint8_t TX_ADDR[5];
-        for (size_t i = 0; i < 5; i++) {
-            if (i < 2 + config->address_width)
-                TX_ADDR[i] = config->tx_address >> 8*i;
-            else
-                TX_ADDR[i] = 0;
-        }
-        radio_register_write(config, TX_ADDR_address, TX_ADDR, 5);
-        radio_register_write(config, RX_ADDR_P0_address, TX_ADDR, 5);
+    uint8_t TX_ADDR[5];
+    for (size_t i = 0; i < 5; i++) {
+        if (i < 2 + config->address_width)
+            TX_ADDR[i] = config->tx_address >> 8*i;
+        else
+            TX_ADDR[i] = 0;
     }
+    radio_register_write(config, TX_ADDR_address, TX_ADDR, 5);
+    radio_register_write(config, RX_ADDR_P0_address, TX_ADDR, 5);
 
     // === RX ADDRESSES ===
 
-    {
-        uint8_t RX_ADDR_P1[5];
-        RX_ADDR_P1[0] = config->rx_pipe_addresses[0];
-        for (size_t i = 1; i < 5; i++) {
-            if (i < 2 + config->address_width)
-                RX_ADDR_P1[i] = config->rx_base_address >> 8*(i-1);
-            else
-                RX_ADDR_P1[i] = 0;
-        }
-        radio_register_write(config, RX_ADDR_P1_address, RX_ADDR_P1, 5);
+    uint8_t RX_ADDR_P1[5];
+    RX_ADDR_P1[0] = config->rx_pipe_addresses[0];
+    for (size_t i = 1; i < 5; i++) {
+        if (i < 2 + config->address_width)
+            RX_ADDR_P1[i] = config->rx_base_address >> 8*(i-1);
+        else
+            RX_ADDR_P1[i] = 0;
+    }
+    radio_register_write(config, RX_ADDR_P1_address, RX_ADDR_P1, 5);
 
-        // Register addresses are consecutive, so use a loop instead of writing
-        // each out manually
-        for (size_t i = 1; i < 5; i++) {
-            radio_register_write(
-                config,
-                RX_ADDR_P1_address + i,
-                &config->rx_pipe_addresses[i],
-                1
-            );
-        }
+    // Register addresses are consecutive, so use a loop instead of writing
+    // each out manually
+    for (size_t i = 1; i < 5; i++) {
+        radio_register_write(
+            config,
+            RX_ADDR_P1_address + i,
+            &config->rx_pipe_addresses[i],
+            1
+        );
     }
 
     // === RX PIPE PAYLOAD SIZES ===
 
-    {
     // Assume payload size 1 for RX pipe 0
     uint8_t rx0_payload_size = 1;
     radio_register_write(config, RX_PW_P0_address, &rx0_payload_size, 1);
@@ -199,7 +189,6 @@ void radio_init_common(RadioConfig *config)
             &config->rx_payload_sizes[i-1],
             1
         );
-    }
     }
 
     // === RESET STATUS AND FLUSH BUFFERS ===
